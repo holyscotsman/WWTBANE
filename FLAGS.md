@@ -15,7 +15,18 @@ ship, but each wants a human before it's "done" per `CLAUDE.md`.
 - **Note:** this only concerns *content quality*. The **runtime never uses AI to
   grade** — correctness is decided solely by the stored authored key.
 
-## 2. Palette identity (inherited, unconfirmed)
+## 2. Host dialogue — intro cinematic (authored content)
+- **What:** the first-run cinematic (`src/shell/ui/cinematic.js`) contains host
+  dialogue: the studio tour lines and the guided tutorial that walks the player
+  through the UI and reveals the first question's answer.
+- **Why flagged:** `CLAUDE.md §7` reserves host dialogue for a human. These
+  lines were AI-drafted at the owner's explicit request ("the host explains how
+  to play") — they are game-mechanics narration, not exam teaching — but still
+  warrant a human read-through for voice and tone.
+- **Integrity note:** the tutorial's revealed answer marks Q1 as assisted, so
+  the freebie never promotes mastery.
+
+## 3. Palette identity (inherited, unconfirmed)
 - The Iris/Aqua/Mantis/Peach/Gold palette is inherited from StarNix and used
   throughout. `CLAUDE.md §6/§8` flag it for confirmation: keep it, or define
   WWTBANE's own identity?

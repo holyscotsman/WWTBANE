@@ -42,7 +42,7 @@ export class Studio {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 0.92; // keep the stage moody, not blown out
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer = renderer;
     this.container.appendChild(renderer.domElement);
@@ -75,7 +75,8 @@ export class Studio {
       const { OutputPass } = await import('three/addons/postprocessing/OutputPass.js');
       this.composer = new EffectComposer(this.renderer);
       this.composer.addPass(new RenderPass(this.active, this.camera));
-      this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.9, 0.5, 0.2));
+      // gentle bloom: strong bloom washed out the host/contestant/audience
+      this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.42, 0.45, 0.34));
       this.composer.addPass(new OutputPass());
       this.useBloom = true;
     } catch {
@@ -204,8 +205,8 @@ export class Studio {
       const k = Math.min(1, this.pulse.t / this.pulse.dur);
       const amt = Math.sin(k * Math.PI); // up then down, single pulse
       this._pulseLight.color.copy(this.pulse.color);
-      this._pulseLight.intensity = 20 + amt * 120;
-      if (k >= 1) { this.pulse.color = null; this._pulseLight.intensity = 20; }
+      this._pulseLight.intensity = 14 + amt * 90;
+      if (k >= 1) { this.pulse.color = null; this._pulseLight.intensity = 14; }
     }
 
     if (this.useBloom && this.composer) {
@@ -231,19 +232,20 @@ export class Studio {
     s.background = new THREE.Color(0x05050d);
     s.fog = new THREE.FogExp2(0x05050d, 0.018);
 
-    s.add(new THREE.AmbientLight(0x222244, 0.5));
-    const key = new THREE.SpotLight(PAL.iris, 120, 60, 0.6, 0.5, 1.2); key.position.set(6, 14, 8); key.target.position.set(0, 1, 0); s.add(key, key.target);
+    // dimmer wash so the figures and set read against the dark (was 120/90/40)
+    s.add(new THREE.AmbientLight(0x222244, 0.4));
+    const key = new THREE.SpotLight(PAL.iris, 65, 60, 0.6, 0.5, 1.2); key.position.set(6, 14, 8); key.target.position.set(0, 1, 0); s.add(key, key.target);
     this._keyLight = key;
-    const key2 = new THREE.SpotLight(PAL.aqua, 90, 60, 0.7, 0.5, 1.2); key2.position.set(-8, 12, 4); key2.target.position.set(0, 1, 0); s.add(key2, key2.target);
-    const warm = new THREE.PointLight(PAL.gold, 40, 30); warm.position.set(0, 4, 2); s.add(warm);
-    this._pulseLight = new THREE.PointLight(PAL.mantis, 20, 40); this._pulseLight.position.set(0, 2, 3); s.add(this._pulseLight);
+    const key2 = new THREE.SpotLight(PAL.aqua, 48, 60, 0.7, 0.5, 1.2); key2.position.set(-8, 12, 4); key2.target.position.set(0, 1, 0); s.add(key2, key2.target);
+    const warm = new THREE.PointLight(PAL.gold, 20, 30); warm.position.set(0, 4, 2); s.add(warm);
+    this._pulseLight = new THREE.PointLight(PAL.mantis, 14, 40); this._pulseLight.position.set(0, 2, 3); s.add(this._pulseLight);
 
     const disc = cyl(9, 9, 0.4, mat(0x0b0b18, 0x090914, 0.2, 0.35, 0.7)); disc.position.y = -0.2;
     disc.geometry = new THREE.CylinderGeometry(9, 9, 0.4, 64); s.add(disc);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(9, 0.08, 10, 80), mat(0x000000, PAL.aqua, 2)); rim.rotation.x = Math.PI / 2; rim.position.y = 0.02; s.add(rim);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(9, 0.08, 10, 80), mat(0x000000, PAL.aqua, 1.7)); rim.rotation.x = Math.PI / 2; rim.position.y = 0.02; s.add(rim);
 
     const spokeGeo = new THREE.BoxGeometry(0.1, 0.05, 6);
-    const spokeMat = mat(0x000000, PAL.gold, 2.2);
+    const spokeMat = mat(0x000000, PAL.gold, 0.45);
     const N = 30, spokes = new THREE.InstancedMesh(spokeGeo, spokeMat, N), d = new THREE.Object3D();
     for (let i = 0; i < N; i++) { const a = i / N * Math.PI * 2; d.position.set(Math.cos(a) * 4.6, 0.03, Math.sin(a) * 4.6); d.rotation.set(0, -a, 0); d.updateMatrix(); spokes.setMatrixAt(i, d.matrix); }
     spokes.instanceMatrix.needsUpdate = true; s.add(spokes);
@@ -272,7 +274,7 @@ export class Studio {
 
     const body = new THREE.CapsuleGeometry(0.13, 0.62, 4, 8); body.translate(0, 1.0, 0);
     const ah = new THREE.SphereGeometry(0.17, 10, 8); ah.translate(0, 1.55, 0);
-    const audMat = mat(0x14142a, PAL.iris, 0.12, 0.7);
+    const audMat = mat(0x1a1a34, PAL.iris, 0.22, 0.7);
     let count = 0; const tiers = 4, per = 42; const total = tiers * per;
     const aud = new THREE.InstancedMesh(mergeTwo(body, ah), audMat, total); const o = new THREE.Object3D();
     // Deterministic jitter so there is no per-frame allocation and no RNG surprises.
@@ -291,12 +293,12 @@ export class Studio {
 
     const back = new THREE.Mesh(new THREE.PlaneGeometry(12, 7), new THREE.MeshBasicMaterial({ map: wordmarkTexture(), transparent: true }));
     back.position.set(0, 4, -12); s.add(back);
-    const halo = new THREE.Mesh(new THREE.CircleGeometry(4.6, 48), mat(0x000000, PAL.iris, 0.7)); halo.position.set(0, 4, -12.2); s.add(halo);
+    const halo = new THREE.Mesh(new THREE.CircleGeometry(4.6, 48), mat(0x000000, PAL.iris, 0.4)); halo.position.set(0, 4, -12.2); s.add(halo);
 
     const beamColors = [PAL.iris, PAL.aqua, PAL.gold, PAL.iris];
     for (let i = 0; i < beamColors.length; i++) {
       const cone = new THREE.Mesh(new THREE.ConeGeometry(1.4, 9, 24, 1, true),
-        new THREE.MeshBasicMaterial({ color: beamColors[i], transparent: true, opacity: 0.06, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+        new THREE.MeshBasicMaterial({ color: beamColors[i], transparent: true, opacity: 0.032, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
       const a = i / beamColors.length * Math.PI * 2; cone.position.set(Math.cos(a) * 3, 5.5, Math.sin(a) * 3);
       cone.rotation.z = Math.cos(a) * 0.18; cone.rotation.x = Math.sin(a) * 0.18; cone.userData.base = a; s.add(cone); this.beams.push(cone);
     }
@@ -364,7 +366,7 @@ function pos(m, x, y, z) { m.position.set(x, y, z); return m; }
 
 function figure(accent, dir) {
   const g = new THREE.Group();
-  const skin = mat(0xeef0ff, accent, 0.35, 0.5);
+  const skin = mat(0xeef0ff, accent, 0.62, 0.5); // brighter accent so figures read on the dim stage
   const head = sph(0.2, skin); head.position.set(0, 1.62, 0); g.add(head);
   const torso = cyl(0.09, 0.11, 0.62, skin); torso.position.set(0, 1.2, 0); g.add(torso);
   const thighL = cyl(0.07, 0.07, 0.5, skin); thighL.position.set(-0.12, 0.92, 0.22 * dir); thighL.rotation.x = Math.PI / 2 * dir; g.add(thighL);

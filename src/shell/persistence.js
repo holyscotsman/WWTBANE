@@ -24,10 +24,10 @@ export function defaultSave() {
     mastery: emptyMastery(),
     wallet: 0,
     lifelines: defaultLifelines(),
-    flags: { reachedFinalBefore: false },
+    flags: { reachedFinalBefore: false, seenIntro: false },
     steveTaught: [],
     stats: { runs: 0, wins: 0, bestPayout: 0, questionsAnswered: 0, longestStreak: 0 },
-    settings: { motion: 'auto', highContrast: false, sound: true, extraTime: false },
+    settings: { motion: 'auto', highContrast: false, sound: true, music: true, extraTime: false },
   };
 }
 

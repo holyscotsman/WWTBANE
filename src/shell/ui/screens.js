@@ -26,11 +26,10 @@ export function TitleScreen(ctx) {
       ctx.stats.bestPayout ? h('span', { class: 'badge' }, `Best: ${money(ctx.stats.bestPayout)}`) : null,
     ),
     h('div', { class: 'menu' },
-      h('button', { class: 'primary big', type: 'button', onclick: () => ctx.onStart('mastery', null) }, 'Start a run'),
-      h('button', { class: 'ghost', type: 'button', onclick: () => ctx.onGreenRoom() }, '🛋 Green room'),
+      h('button', { class: 'primary big', type: 'button', onclick: () => ctx.onStart('mastery', null) }, 'Start new game'),
     ),
     h('details', { class: 'seed-box' },
-      h('summary', {}, 'Play a shared seed'),
+      h('summary', {}, 'Enter seed'),
       h('p', {}, 'A seed plays the exact same 30 questions for anyone — great for challenging a friend. Leave blank for a fresh random seed.'),
       h('div', { class: 'seed-controls' },
         seedInput,
@@ -45,6 +44,29 @@ export function TitleScreen(ctx) {
 }
 
 export function GreenRoom(ctx) {
+  // Straight off a loss: show the correct answer and its explanation first —
+  // and the reminder that the whole point is to walk back out there.
+  if (ctx.reveal) {
+    const r = ctx.reveal;
+    return h('section', { class: 'screen green-room' },
+      h('h2', { class: 'screen-title' }, r.impossibleFinal ? '🎭 The impossible final' : 'Back in the green room'),
+      h('p', { class: 'muted' }, r.impossibleFinal
+        ? 'You reached the final — and almost nobody wins it the first time. That was by design. Here is the answer it was hiding:'
+        : `Question ${r.reached} got you. It happens to every contestant — here is the one that did it:`),
+      h('div', { class: 'reveal' },
+        h('div', { class: 'reveal-label' }, 'the correct answer was'),
+        h('div', { class: 'reveal-answer' }, r.correctText || '—'),
+        r.explanation ? h('p', { class: 'reveal-exp' }, r.explanation) : null,
+      ),
+      h('div', { class: 'wallet-row' }, h('span', { class: 'wallet' }, `🛡 ${money(r.banked)} coins banked this run`)),
+      h('p', { class: 'muted', style: { textAlign: 'center', maxWidth: '52ch', margin: '0 auto' } },
+        'The run is over — the climb isn’t. Every question you just faced sharpened your mastery, and the ones you missed will come back until they stick. Champions are the ones who go again.'),
+      h('div', { class: 'menu' },
+        h('button', { class: 'primary big', type: 'button', onclick: () => ctx.onAckReveal() }, 'Got it — to the green room'),
+      ),
+    );
+  }
+
   const shopRow = (type) => {
     const l = ctx.lifelines[type];
     const meta = LIFELINE_META[type];
@@ -103,7 +125,7 @@ export function GreenRoom(ctx) {
     ),
 
     h('div', { class: 'menu' },
-      h('button', { class: 'primary big', type: 'button', onclick: () => ctx.onEnterStudio() }, 'Enter the studio →'),
+      h('button', { class: 'primary big', type: 'button', onclick: () => ctx.onEnterStudio() }, 'Start next round →'),
       h('button', { class: 'link', type: 'button', onclick: () => ctx.onBack() }, 'Back to title'),
     ),
   );
@@ -188,7 +210,8 @@ export function SettingsScreen(ctx) {
     h('h2', { class: 'screen-title' }, 'Settings'),
     h('label', { class: 'setting' }, motionSel, h('span', {}, h('b', {}, 'Motion'), h('span', { class: 'muted small' }, 'Reduced motion cuts between camera angles instead of gliding, and stops flashes.'))),
     toggle('highContrast', 'High contrast', 'Boost text and outline contrast.'),
-    toggle('sound', 'Sound effects', 'Original synth cues for correct, wrong, and wins.'),
+    toggle('sound', 'Sound effects', 'Short cues for picking, locking, and lifelines.'),
+    toggle('music', 'Music', 'Original synth score: lounge in the green room, tier loops that slow and darken as the money climbs.'),
     toggle('extraTime', 'No timers', 'There is never a countdown; this keeps it that way if timers are ever added.'),
     h('div', { class: 'danger' },
       h('button', { class: 'ghost small', type: 'button', onclick: () => ctx.onReset() }, 'Reset all progress'),

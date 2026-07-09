@@ -119,6 +119,12 @@ export class QuizScreen {
     this.lockBtn.disabled = this.selected.size === 0;
   }
 
+  // Signal (once) that a lifeline has delivered its help — the music engine
+  // pops back from the lifeline loop to the tier loop.
+  _lifelineDone(ms) {
+    this._after(ms, () => { if (this.handlers.onLifelineDone) this.handlers.onLifelineDone(); });
+  }
+
   applyLifeline(type, payload) {
     if (type === 'fifty') {
       for (const idx of payload.removed) {
@@ -128,6 +134,7 @@ export class QuizScreen {
         if (btn) { btn.classList.add('removed'); btn.disabled = true; btn.setAttribute('aria-hidden', 'true'); }
       }
       this._refreshSelection();
+      this._lifelineDone(2600);
     } else if (type === 'audience') {
       clear(this.lifelinePanel);
       const max = Math.max(...payload.bars.map((b) => b.percent));
@@ -159,6 +166,7 @@ export class QuizScreen {
         };
         requestAnimationFrame(step);
       }
+      this._lifelineDone(4400); // bars + a beat to read them
     } else if (type === 'phone') {
       clear(this.lifelinePanel);
       const caret = h('span', { class: 'phone-caret', 'aria-hidden': 'true' });
@@ -170,6 +178,7 @@ export class QuizScreen {
       if (reduced()) {
         typed.textContent = text;
         caret.remove();
+        this._lifelineDone(1200);
       } else {
         let n = 0;
         this._typeIv = setInterval(() => {
@@ -177,6 +186,7 @@ export class QuizScreen {
           typed.textContent = text.slice(0, n);
           if (n >= text.length) { clearInterval(this._typeIv); caret.remove(); }
         }, 33);
+        this._lifelineDone(text.length * 33 + 2600); // typing + a beat to read
       }
     }
   }
@@ -236,10 +246,22 @@ export class QuizScreen {
     const lockRow = this.card.querySelector('.lock-row');
     if (lockRow) lockRow.remove();
 
-    const label = result.won ? 'Collect your winnings' : (result.correct ? 'Next question' : 'See how you did');
-    const fb = h('div', { class: `feedback ${result.correct ? 'good' : 'bad'}`, role: 'status' },
-      h('div', { class: 'fb-head' }, result.correct ? (result.won ? '🏆 You did it!' : '✓ Correct') : '✗ Not this time'),
-      result.boundary && result.correct ? h('div', { class: 'fb-bank' }, `🛡 Banked ${result.banked.toLocaleString('en-US')} coins — that's yours to keep.`) : null,
+    if (result.correct === false) {
+      // A wrong answer heads straight to the green room, where the correct
+      // answer and its explanation are waiting. Brief beat to read the marks.
+      const fb = h('div', { class: 'feedback bad', role: 'status' },
+        h('div', { class: 'fb-head' }, '✗ Not this time'),
+        h('p', { class: 'fb-note' }, 'The correct answer is lit above. Walking you back to the green room…'),
+      );
+      this.card.append(fb);
+      this._after(2600, () => { if (this.handlers.onContinue) this.handlers.onContinue(result); });
+      return;
+    }
+
+    const label = result.won ? 'Collect your winnings' : 'Next question';
+    const fb = h('div', { class: 'feedback good', role: 'status' },
+      h('div', { class: 'fb-head' }, result.won ? '🏆 You did it!' : '✓ Correct'),
+      result.boundary ? h('div', { class: 'fb-bank' }, `🛡 Banked ${result.banked.toLocaleString('en-US')} coins — that's yours to keep.`) : null,
       h('p', { class: 'fb-exp' }, result.explanation),
       result.q && result.q.reference ? h('p', { class: 'fb-ref' }, 'Reference: ' + result.q.reference) : null,
       h('button', { class: 'continue-btn', type: 'button', onclick: () => this.handlers.onContinue && this.handlers.onContinue(result) }, label),

@@ -15,7 +15,7 @@ async function main() {
   await context.addInitScript(() => { try {
     localStorage.setItem('wwtbane.e2e', '1');
     localStorage.setItem('wwtbane.nogl', '1'); // show the CSS studio (the designed backdrop)
-    localStorage.removeItem('wwtbane.save.v1');
+    localStorage.setItem('wwtbane.save.v1', JSON.stringify({ version: 1, flags: { seenIntro: true }, settings: { music: false } }));
   } catch {} });
   const page = await context.newPage();
 
@@ -44,13 +44,36 @@ async function main() {
   await page.waitForTimeout(400);
   await page.screenshot({ path: `${OUT}/shot-game-reveal.png` });
 
-  // green room (fresh page so state is clean)
+  // green room — reached the way players reach it now: by losing
   await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' });
   await page.waitForSelector('.brand-main');
-  await page.click('button.ghost');
-  await page.waitForSelector('.green-room');
+  await page.click('button.primary.big');
+  await page.waitForSelector('.q-card .stem');
+  const wrong = await page.evaluate(() => { const a = window.__wwt.answer(); for (let i = 0; i < 6; i++) if (!a.includes(i)) return i; return 0; });
+  await page.click(`.option[data-i="${wrong}"]`);
+  await page.click('.lock-btn');
+  await page.waitForSelector('.green-room .reveal-answer', { timeout: 15000 });
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${OUT}/shot-greenroom-reveal.png` });
+  await page.click('.green-room .primary.big');
+  await page.waitForSelector('.shop');
   await page.waitForTimeout(700);
   await page.screenshot({ path: `${OUT}/shot-greenroom.png` });
+
+  // the intro cinematic (fresh save)
+  const ctx2 = await context.browser().newContext({ viewport: { width: 1440, height: 900 } });
+  await ctx2.addInitScript(() => { try {
+    localStorage.setItem('wwtbane.nogl', '1');
+    localStorage.setItem('wwtbane.save.v1', JSON.stringify({ version: 1, settings: { music: false } }));
+  } catch {} });
+  const p2 = await ctx2.newPage();
+  await p2.goto(`http://localhost:${PORT}/`, { waitUntil: 'load' });
+  await p2.waitForSelector('.brand-main');
+  await p2.click('button.primary.big');
+  await p2.waitForSelector('.cine-panel');
+  await p2.waitForTimeout(2600);
+  await p2.screenshot({ path: `${OUT}/shot-cinematic.png` });
+  await ctx2.close();
 
   // mobile
   const mob = await context.newPage();

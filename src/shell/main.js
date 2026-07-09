@@ -15,9 +15,11 @@ import { letter } from '../core/lifelines.js';
 
 import * as persistence from './persistence.js';
 import { GameAudio } from './audio.js';
+import { Music } from './music.js';
 import { CssBackdrop } from './backdrop.js';
 import { Hud } from './ui/hud.js';
 import { QuizScreen } from './ui/overlay.js';
+import { Cinematic } from './ui/cinematic.js';
 import { TitleScreen, GreenRoom, ResultScreen, HelpScreen, SettingsScreen } from './ui/screens.js';
 import { h, clear } from './ui/dom.js';
 
@@ -29,15 +31,18 @@ export class Game {
     this.bus = createBus();
     this.save = persistence.load();
     this.audio = new GameAudio({ enabled: this.save.settings.sound });
+    this.music = new Music({ enabled: this.save.settings.music !== false });
     this.bank = null;
     this.campaign = null;      // persistent mastery SetManager
     this.rc = null;
+    this._greenReveal = null;  // loss info shown in the green room
     this.hud = new Hud({ onLifeline: (t) => this.useLifeline(t) });
     this.quiz = new QuizScreen({
       onAnswer: (idx) => this.answer(idx),
       onContinue: (r) => this.continueAfter(r),
       onSelectSound: () => this.audio.play('select'),
-      onLockSound: () => this.audio.play('lock'),
+      onLockSound: () => { this.audio.play('lock'); this.music.pop(); this.music.duck(2.2, 0.25); },
+      onLifelineDone: () => this.music.pop(),
     });
     this.steveVisit = { called: false, question: null, clue: '' };
     this.reduced = this._resolveReduced();
@@ -80,12 +85,28 @@ export class Game {
       this.roots.fallback.classList.remove('hidden');
     }
 
-    // Audio reacts to the same event stream.
-    this.bus.on('answer:correct', (d) => this.audio.play(d.boundary ? 'bank' : 'correct'));
-    this.bus.on('answer:wrong', () => this.audio.play('wrong'));
-    this.bus.on('lifeline:use', () => this.audio.play('lifeline'));
-    this.bus.on('run:win', () => this.audio.play('win'));
-    this.bus.on('question:show', (d) => { if (d.isFinal) this._markFinalReached(); });
+    // Audio reacts to the same event stream. Big musical moments (right/wrong/
+    // final-wrong/win) are the music engine's stingers; small UI cues stay sfx.
+    this.bus.on('answer:correct', (d) => { this.music.stinger('right'); if (d.boundary) this.audio.play('bank'); });
+    this.bus.on('answer:wrong', (d) => this.music.stinger(d.index === 29 ? 'finalWrong' : 'wrong'));
+    this.bus.on('lifeline:use', () => { this.audio.play('lifeline'); this.music.push('lifeline'); });
+    this.bus.on('run:win', () => { this.music.stop(); this.music.stinger('win'); });
+    this.bus.on('run:dead', () => this.music.stop());
+    this.bus.on('question:show', (d) => {
+      if (d.isFinal) this._markFinalReached();
+      // Tier loops: quicker and brighter on easy, slower and lower as tiers rise.
+      this.music.play(d.isFinal ? 'final' : d.tier);
+    });
+    this.bus.on('scene:green', () => this.music.play('lounge'));
+    this.bus.on('scene:studio', () => { if (this.screen !== 'quiz') this.music.play('lounge'); });
+
+    // Browsers require a user gesture before audio can start.
+    const kick = () => {
+      this.audio.resume(); this.music.resume();
+      if (this.screen === 'title' || this.screen === 'greenroom') this.music.play('lounge');
+    };
+    window.addEventListener('pointerdown', kick, { once: true });
+    window.addEventListener('keydown', kick, { once: true });
 
     // HUD flourishes: banking particles + shield stamp, and the win ★ burst.
     this.bus.on('coins:bank', () => { if (this.rc) this.hud.bank(this.rc.index); });
@@ -162,6 +183,8 @@ export class Game {
     this._swap(GreenRoom({
       wallet: this.save.wallet,
       lifelines: this.save.lifelines,
+      reveal: this._greenReveal, // set after a loss: the answer + explanation first
+      onAckReveal: () => { this._greenReveal = null; this._renderGreenRoom(); },
       steve: {
         question: this.steveVisit.question,
         calledThisVisit: this.steveVisit.called,
@@ -259,13 +282,45 @@ export class Game {
       emit: (t, d) => this.bus.emit(t, d),
     });
     this.hud.setSeed && this.hud.setSeed(seed);
-    this.screen = 'quiz';
-    this.quiz.mount(this.roots.screen, this.hud.el);
-    this.audio.resume();
-    const cur = this.rc.start();
-    this.quiz.showQuestion(cur, this.rc.snapshot());
-    this.hud.update(this.rc.snapshot());
-    this._announce(`Question 1 of 30. ${cur.q.stem}`);
+
+    const beginPlay = () => {
+      this.screen = 'quiz';
+      this.quiz.mount(this.roots.screen, this.hud.el);
+      this.audio.resume();
+      const cur = this.rc.start();
+      this.quiz.showQuestion(cur, this.rc.snapshot());
+      this.hud.update(this.rc.snapshot());
+      this._announce(`Question 1 of 30. ${cur.q.stem}`);
+    };
+
+    // First run ever: the host gives a tour of the soundstage, then walks the
+    // player through the UI on the real first question (and gives the answer).
+    if (!this.save.flags.seenIntro) this._playIntro(beginPlay);
+    else beginPlay();
+  }
+
+  _playIntro(beginPlay) {
+    let started = false;
+    this.screen = 'cinematic';
+    clear(this.roots.screen); // clear the title; the studio is the set
+    this.bus.emit('scene:studio', {});
+    const cine = new Cinematic({
+      onCam: (k) => { if (this.studio) this.studio.cutTo(k); },
+      onStartRun: () => { started = true; beginPlay(); },
+      answerFor: () => {
+        const q = this.rc.set[0];
+        const i = q.answer[0];
+        return { letter: letter(i), text: q.options[i] };
+      },
+      // The host's freebie must not promote mastery — mark Q1 assisted.
+      onAnswerRevealed: () => { if (this.rc) this.rc.assisted = true; },
+      onDone: () => {
+        if (!started) beginPlay();
+        this.save.flags.seenIntro = true;
+        this.persist();
+      },
+    });
+    cine.play();
   }
 
   useLifeline(type) {
@@ -314,28 +369,34 @@ export class Game {
       // "climb again" button. Mastery persists.
       this.save = persistence.prestige(this.save);
       this.campaign = null; // fresh climb from the top on the next run
-    } else {
-      this.save.wallet += pay || 0;
-      // Advance the mastery campaign's double buffer for the next run.
-      if (this.mode !== 'seeded' && this.campaign) this.campaign.advance();
+      this.persist();
+      this._swap(ResultScreen({
+        won: true,
+        payout: pay || 0,
+        wallet: this.save.wallet, // 0 — prestige has reset it
+        reached,
+        onPrestige: () => this.startRun('mastery', null),
+        onTitle: () => this.showTitle(),
+      }));
+      this.screen = 'result';
+      this.rc = null;
+      return;
     }
-    this.persist();
 
-    const impossibleFinal = !won && result && result.wasFinal && result.wasImpossible;
-    this._swap(ResultScreen({
-      won,
-      payout: pay || 0,          // the prize just won (a win still shows 50,000)
-      wallet: this.save.wallet,  // 0 after a win, since prestige has reset it
-      reached,
-      impossibleFinal,
-      correctText: !won && result ? this._answerText(result.q, result.correctAnswer) : null,
-      explanation: !won && result ? result.explanation : null,
-      onGreenRoom: () => this.showGreenRoom(),
-      onPrestige: () => this.startRun('mastery', null), // reset already applied; straight into a fresh climb
-      onTitle: () => this.showTitle(),
-    }));
-    this.screen = 'result';
+    // A loss walks straight back to the green room, where the correct answer
+    // and its explanation are waiting (and the pep talk to go again).
+    this.save.wallet += pay || 0;
+    if (this.mode !== 'seeded' && this.campaign) this.campaign.advance();
+    this.persist();
+    this._greenReveal = {
+      impossibleFinal: !!(result && result.wasFinal && result.wasImpossible),
+      correctText: result ? this._answerText(result.q, result.correctAnswer) : null,
+      explanation: result ? result.explanation : null,
+      reached: reached + 1, // the question that ended the run
+      banked: pay || 0,
+    };
     this.rc = null;
+    this.showGreenRoom();
   }
 
   /* ---------------- helpers ---------------- */
@@ -365,6 +426,10 @@ export class Game {
     this.reduced = this._resolveReduced();
     if (this.studio) this.studio.reduced = this.reduced;
     this.audio.setEnabled(this.save.settings.sound);
+    this.music.setEnabled(this.save.settings.music !== false);
+    if (this.save.settings.music !== false && (this.screen === 'title' || this.screen === 'greenroom')) {
+      this.music.play('lounge');
+    }
     this._applyBodyClasses();
   }
 

@@ -64,6 +64,10 @@ export class CssBackdrop {
         h('div', { class: 'bd-sofa' },
           h('div', { class: 'back' }), h('div', { class: 'seat' }),
           h('div', { class: 'arm a1' }), h('div', { class: 'arm a2' })),
+        // the contestant, waiting it out — slouched, swaying, tapping a foot
+        h('div', { class: 'bd-contestant' },
+          h('span', { class: 'c-head' }), h('span', { class: 'c-body' }),
+          h('span', { class: 'c-leg l1' }), h('span', { class: 'c-leg l2' })),
         h('div', { class: 'bd-gvignette' }),
       ),
     );
