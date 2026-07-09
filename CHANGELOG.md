@@ -32,3 +32,12 @@ Added the whole first end-to-end game, hostable as static files on GitHub Pages.
   (moved the counter out of `prestige`).
 - Focus moves to the new screen's heading on navigation (keyboard / screen reader).
 - Added a GitHub Actions workflow that runs the headless suite on every push and PR.
+
+### Review follow-ups (from an automated PR review)
+- Seeded runs are now reproducible through the impossible first final: the flag
+  is passed to the seeded builder so Q30 is chosen with the seeded RNG, not
+  `Math.random()`. Two first-time players on the same seed get the same final.
+  (Mastery play keeps the non-deterministic swap.)
+- A win now applies its prestige reset (coins + purchased slots) in `endRun`, so
+  it can't be bypassed by leaving the win screen via "Back to title" — every exit
+  starts a fresh climb. Mastery still persists.

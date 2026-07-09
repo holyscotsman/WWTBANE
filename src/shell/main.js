@@ -210,7 +210,10 @@ export class Game {
     let set, seed;
     if (mode === 'seeded') {
       seed = (seedInput && seedInput.length ? seedInput : generateSeedString()).toUpperCase();
-      const sm = new SetManager({ bank: this.bank, getMastery: () => this.save.mastery, mode: 'seeded', seed, reachedFinalBefore: true });
+      // Seeded runs must be fully reproducible — INCLUDING the impossible first
+      // final. Pass the flag through so buildSet picks Q30 with the SEEDED rng;
+      // two first-time players on the same seed then get the same final.
+      const sm = new SetManager({ bank: this.bank, getMastery: () => this.save.mastery, mode: 'seeded', seed, reachedFinalBefore: this.save.flags.reachedFinalBefore });
       sm.init();
       set = sm.current();
       this._seededManager = sm;
@@ -218,16 +221,16 @@ export class Game {
       this._ensureCampaign();
       seed = null;
       set = this.campaign.current();
-    }
-
-    // Impossible first final: the very first time the player ever reaches Q30,
-    // swap in a genuinely obscure real question. Gated on a persisted flag.
-    if (!this.save.flags.reachedFinalBefore) {
-      const impossibles = this.bank.filter((q) => q.impossible);
-      if (impossibles.length) {
-        const pick = impossibles[Math.floor(Math.random() * impossibles.length)];
-        set = set.slice();
-        set[29] = pick;
+      // Impossible first final (mastery only): the campaign double-buffer is built
+      // with reachedFinalBefore:true so a prebuilt set can't bake in a stale
+      // impossible final, so swap Q30 here while the flag is unset. Mastery play
+      // is non-deterministic, so Math.random is appropriate.
+      if (!this.save.flags.reachedFinalBefore) {
+        const impossibles = this.bank.filter((q) => q.impossible);
+        if (impossibles.length) {
+          set = set.slice();
+          set[29] = impossibles[Math.floor(Math.random() * impossibles.length)];
+        }
       }
     }
 
@@ -285,26 +288,36 @@ export class Game {
 
   endRun(won, result) {
     const pay = won ? result.payout : (result ? result.payout : payout({ clearedCount: this.rc.clearedCount, won: false }));
-    this.save.wallet += pay || 0;
+    const reached = this.rc.clearedCount;
     this.save.stats.runs += 1;
     if (won) this.save.stats.wins += 1;
     this.save.stats.bestPayout = Math.max(this.save.stats.bestPayout, pay || 0);
-    this.save.stats.longestStreak = Math.max(this.save.stats.longestStreak, this.rc.clearedCount);
-    // Advance the mastery campaign's double buffer for the next run.
-    if (this.mode !== 'seeded' && this.campaign) this.campaign.advance();
+    this.save.stats.longestStreak = Math.max(this.save.stats.longestStreak, reached);
+
+    if (won) {
+      // A win banks learning but resets coins and purchased slots (prestige) —
+      // applied here so EVERY exit from the win screen starts fresh, not just the
+      // "climb again" button. Mastery persists.
+      this.save = persistence.prestige(this.save);
+      this.campaign = null; // fresh climb from the top on the next run
+    } else {
+      this.save.wallet += pay || 0;
+      // Advance the mastery campaign's double buffer for the next run.
+      if (this.mode !== 'seeded' && this.campaign) this.campaign.advance();
+    }
     this.persist();
 
     const impossibleFinal = !won && result && result.wasFinal && result.wasImpossible;
     this._swap(ResultScreen({
       won,
-      payout: pay || 0,
-      wallet: this.save.wallet,
-      reached: this.rc.clearedCount,
+      payout: pay || 0,          // the prize just won (a win still shows 50,000)
+      wallet: this.save.wallet,  // 0 after a win, since prestige has reset it
+      reached,
       impossibleFinal,
       correctText: !won && result ? this._answerText(result.q, result.correctAnswer) : null,
       explanation: !won && result ? result.explanation : null,
       onGreenRoom: () => this.showGreenRoom(),
-      onPrestige: () => { this.save = persistence.prestige(this.save); this.campaign = null; this.persist(); this.showTitle(); },
+      onPrestige: () => this.startRun('mastery', null), // reset already applied; straight into a fresh climb
       onTitle: () => this.showTitle(),
     }));
     this.screen = 'result';

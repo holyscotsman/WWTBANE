@@ -48,6 +48,14 @@ test('impossible final is gated on the reached-final flag, not the seed', () => 
   assert.notEqual(later[29].impossible, true, 'later finals are not impossible'); // NEGATIVE CONTROL
 });
 
+test('the impossible first final is deterministic under a seed (same seed, same Q30)', () => {
+  const bank = makeBank();
+  const a = buildSet({ bank, mode: 'seeded', seed: 'SHARED', setIndex: 0, reachedFinalBefore: false });
+  const b = buildSet({ bank, mode: 'seeded', seed: 'SHARED', setIndex: 0, reachedFinalBefore: false });
+  assert.equal(a[29].impossible, true);
+  assert.equal(a[29].id, b[29].id, 'two first-time players on the same seed get the same final'); // NEGATIVE CONTROL
+});
+
 test('selection backfills when a tier is short and still returns 30 distinct', () => {
   const bank = makeBank({ easy: 5, medium: 15, hard: 15, extreme: 5, impossible: 2 }); // too few easy
   const set = buildSet({ bank, mode: 'seeded', seed: 'BF', setIndex: 0, reachedFinalBefore: true });

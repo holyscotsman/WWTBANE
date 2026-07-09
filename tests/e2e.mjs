@@ -59,16 +59,20 @@ async function main() {
     }
     await page.waitForSelector('.result-screen.win', { timeout: 8000 });
     const wallet = await page.evaluate(() => window.__wwt.wallet());
+    const winMsg = (await page.textContent('.result-msg')) || '';
     check('won all 30 questions (incl. impossible final) via the real DOM flow', won);
-    check('winning pays the full 50,000 prize', wallet === 50000, `wallet=${wallet}`);
+    // A win is a prestige: coins reset to zero regardless of which exit is taken.
+    check('winning applies the prestige reset (coins back to zero)', wallet === 0, `wallet=${wallet}`);
+    check('the win screen still shows the 50,000 top prize', /50,?000/.test(winMsg), winMsg.slice(0, 40));
 
-    // Prestige resets coins.
-    await page.click('.result-screen .primary.big'); // Climb again (prestige)
+    // "Climb again" starts a fresh run directly (reset already applied in endRun).
+    await page.click('.result-screen .primary.big');
+    await page.waitForSelector('.q-card .stem', { timeout: 10000 });
+    check('climb again starts a fresh run', true);
+
+    // ---- Scenario 2: lose on purpose, then the green room (fresh page) ----
+    await page.goto(base, { waitUntil: 'load', timeout: 20000 });
     await page.waitForSelector('.brand-main', { timeout: 8000 });
-    const walletAfter = await page.evaluate(() => window.__wwt.wallet());
-    check('prestige resets the wallet to zero', walletAfter === 0, `wallet=${walletAfter}`);
-
-    // ---- Scenario 2: lose on purpose, then the green room ----
     await page.click('button.primary.big');
     await page.waitForSelector('.q-card .stem', { timeout: 10000 });
     const wrong = await page.evaluate(() => { const a = window.__wwt.answer(); for (let i = 0; i < 6; i++) if (!a.includes(i)) return i; return 0; });
