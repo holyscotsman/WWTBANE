@@ -218,6 +218,7 @@ export class Game {
 
   _callSteve() {
     if (this.steveVisit.called || !this.steveVisit.question || this.save.wallet < SHOP.steve) return;
+    this.bus.emit('steve:call', {}); // the backdrop cuts to the sketchy guy
     this.save.wallet -= SHOP.steve;
     this.steveVisit.called = true;
     this.steveVisit.locked = true; // don't re-roll his question until next real visit

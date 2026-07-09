@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased — camera director: cinematic scenes & takes
+
+- **Camera director** (`src/shell/director.js` + `src/shell/takes.js`): the
+  studio camera now plays scene playlists of timed takes — looping background
+  footage with event-triggered cutscenes that return to (or advance past) the
+  interrupted scene. Owner-specced scenes implemented verbatim: the intro
+  orbital (10s loop), "host asks" tier-opener (4s -> thinking), and the
+  10-take "player is thinking" loop (contestant/host focus, audience pans,
+  overhead tilt, piggy-bank zoom, wideshot, intensity push-ins, orbital).
+  Drafted the rest for review: final-answer hold, correct/incorrect, host
+  explains, final-correct win loop, green-room loop, the three lifelines,
+  the sketchy-guy call, and producer-says-ready (docs/CINEMATIC_TAKES.md).
+- **New set pieces:** a gold piggy bank on a lit pedestal at stage right, a
+  stage manager (headset + clipboard) in the wings, and a sketchy guy (long
+  coat, wide-brim hat) by the green-room doors. Original art drawn in code.
+- Manual camera orbiting retired — the show is broadcast footage now; the
+  intro tutorial's locked-off poses still work via director.holdPose.
+- Reduced motion: every take is a locked-off cut held at its mid pose.
+
+
 ## Unreleased — music, intro cinematic, and the new loss flow
 
 - **Procedural music** (`src/shell/music.js`): original WebAudio compositions,

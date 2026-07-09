@@ -7,10 +7,11 @@
 // only; stick figures + glow; no cloned trade dress.
 
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Director } from './director.js';
 
 const PAL = { iris: 0x7855FA, aqua: 0x1FDDE9, mantis: 0x92DD23, peach: 0xFF6B5B, gold: 0xFFC857 };
 
+// Locked-off poses used by the intro tutorial's tour (director.holdPose).
 const PRESETS = {
   two:    { p: [0, 3.3, 12],  t: [0, 1.4, 0] },
   host:   { p: [-3.2, 1.9, 4], t: [2.1, 1.5, 0] },
@@ -30,10 +31,7 @@ export class Studio {
     this.useBloom = false;
     this.mood = { key: PAL.iris, intensity: 1 };
     this.pulse = { color: null, t: 0, dur: 0.7 };
-    this.cam = {
-      from: new THREE.Vector3(), to: new THREE.Vector3(),
-      tFrom: new THREE.Vector3(), tTo: new THREE.Vector3(), k: 1, dur: 1.1,
-    };
+    this._look = new THREE.Vector3();
     this._spin = 1; // beam spin multiplier (bumped on wins)
   }
 
@@ -49,12 +47,9 @@ export class Studio {
     renderer.domElement.setAttribute('aria-hidden', 'true');
 
     this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
-    this.controls = new OrbitControls(this.camera, renderer.domElement);
-    this.controls.enableDamping = true;
-    this.controls.maxPolarAngle = Math.PI * 0.52;
-    this.controls.minDistance = 3;
-    this.controls.maxDistance = 40;
-    this.controls.enablePan = false;
+    // The camera director owns every shot (takes.js); it swaps 3D sets as its
+    // scenes demand. Manual orbiting is retired — this is broadcast footage.
+    this.director = new Director({ reduced: this.reduced, onSet: (set) => this.setScene(set) });
 
     this.clock = new THREE.Clock();
     this.studio = this._buildStudio();
@@ -62,7 +57,6 @@ export class Studio {
     this.active = this.studio;
 
     await this._setupBloom();
-    this._setCam('two', true);
     window.addEventListener('resize', this._onResize);
     renderer.setAnimationLoop(this._tick);
   }
@@ -91,29 +85,27 @@ export class Studio {
     if (this.active === target) return;
     this.active = target;
     if (this.useBloom && this.composer) this.composer.passes[0].scene = this.active;
-    this._setCam(name === 'green' ? 'green' : 'two', false);
   }
 
-  cutTo(camKey) { if (PRESETS[camKey]) this._setCam(camKey, false); }
+  // Freeze on a named pose (used by the intro tutorial's tour).
+  cutTo(camKey) {
+    const P = PRESETS[camKey];
+    if (P) this.director.holdPose(P.p, P.t);
+  }
 
-  // React to a quiz event (the backdrop side of the event contract).
+  // React to a quiz event: the director cues the camera (scene playlists in
+  // takes.js); this switch keeps the lighting side — mood, pulses, beam spin.
   react(type, data = {}) {
+    this.director.cue(type, data);
     switch (type) {
       case 'question:show':
-        this.setScene('studio');
-        if (data.isFinal) { this._setMood(PAL.gold, 1.15); this.cutTo('two'); }
-        else if (data.tier === 'hard') { this._setMood(PAL.iris, 1.05); this.cutTo('player'); }
-        else if (data.tier === 'medium') { this._setMood(PAL.aqua, 1.0); this.cutTo('two'); }
-        else { this._setMood(PAL.iris, 0.95); this.cutTo('two'); }
-        break;
-      case 'lifeline:use':
-        if (data.type === 'audience') this.cutTo('aud');
-        else if (data.type === 'phone') this.cutTo('host');
-        else this.cutTo('over');
+        if (data.isFinal) this._setMood(PAL.gold, 1.15);
+        else if (data.tier === 'hard') this._setMood(PAL.iris, 1.05);
+        else if (data.tier === 'medium') this._setMood(PAL.aqua, 1.0);
+        else this._setMood(PAL.iris, 0.95);
         break;
       case 'answer:correct':
         this._flash(PAL.mantis);
-        this.cutTo('player');
         break;
       case 'answer:wrong':
         this._flash(PAL.peach);
@@ -122,17 +114,9 @@ export class Studio {
       case 'run:win':
         this._setMood(PAL.gold, 1.3);
         this._spin = this.reduced ? 1 : 3;
-        this.cutTo('two');
         break;
       case 'run:dead':
         this._setMood(0x223, 0.5);
-        this.cutTo('over');
-        break;
-      case 'scene:green':
-        this.setScene('green');
-        break;
-      case 'scene:studio':
-        this.setScene('studio');
         break;
       default: break;
     }
@@ -171,24 +155,16 @@ export class Studio {
     this.pulse.t = 0;
   }
 
-  _setCam(key, instant) {
-    const P = PRESETS[key]; if (!P) return;
-    this.cam.from.copy(this.camera.position); this.cam.tFrom.copy(this.controls.target);
-    this.cam.to.set(...P.p); this.cam.tTo.set(...P.t);
-    this.cam.k = (instant || this.reduced) ? 1 : 0;
-    if (this.cam.k === 1) { this.camera.position.copy(this.cam.to); this.controls.target.copy(this.cam.tTo); this.controls.update(); }
-  }
-
   _tick = () => {
     if (this.disposed) return;
     const dt = this.clock.getDelta();
-    if (this.cam.k < 1) {
-      this.cam.k = Math.min(1, this.cam.k + dt / this.cam.dur);
-      const e = this.cam.k < 0.5 ? 2 * this.cam.k * this.cam.k : 1 - Math.pow(-2 * this.cam.k + 2, 2) / 2;
-      this.camera.position.lerpVectors(this.cam.from, this.cam.to, e);
-      this.controls.target.lerpVectors(this.cam.tFrom, this.cam.tTo, e);
+    this.director.reduced = this.reduced;
+    const pose = this.director.update(dt);
+    if (pose) {
+      this.camera.position.set(pose.p[0], pose.p[1], pose.p[2]);
+      this._look.set(pose.t[0], pose.t[1], pose.t[2]);
+      this.camera.lookAt(this._look);
     }
-    this.controls.update();
 
     if (!this.reduced && this.active === this.studio) {
       const t = this.clock.elapsedTime;
@@ -302,6 +278,24 @@ export class Studio {
       const a = i / beamColors.length * Math.PI * 2; cone.position.set(Math.cos(a) * 3, 5.5, Math.sin(a) * 3);
       cone.rotation.z = Math.cos(a) * 0.18; cone.rotation.x = Math.sin(a) * 0.18; cone.userData.base = a; s.add(cone); this.beams.push(cone);
     }
+
+    // The piggy bank — where the coins live. On a pedestal at stage right;
+    // the "thinking" playlist gives it a dramatic slow zoom (takes.js).
+    s.add(piggyBank(4.2, 2.2));
+
+    // The stage manager in the wings — headset, clipboard, permanently busy.
+    // The "producerReady" scene cuts to them when a new game starts.
+    const sm = standingFigure(0x23232f, PAL.aqua, 0.08);
+    sm.position.set(-6.5, 0, 3.0); sm.rotation.y = 0.9; // facing the stage
+    // over-ear headset band + a little boom mic
+    const headset = new THREE.Mesh(new THREE.TorusGeometry(0.19, 0.028, 8, 20), mat(0x0a0a14, PAL.aqua, 0.5));
+    headset.position.set(0, 1.58, 0); headset.rotation.y = Math.PI / 2; sm.add(headset);
+    const mic = box(0.03, 0.03, 0.16, mat(0x0a0a14, PAL.aqua, 0.6));
+    mic.position.set(0.12, 1.5, 0.12); mic.rotation.y = 0.5; sm.add(mic);
+    const clipboard = box(0.26, 0.36, 0.03, mat(0x22222e, PAL.aqua, 0.25));
+    clipboard.position.set(-0.28, 1.12, 0.14); clipboard.rotation.set(0.3, 0.2, 0.1); sm.add(clipboard);
+    s.add(sm);
+
     return s;
   }
 
@@ -351,6 +345,18 @@ export class Studio {
     const you = figure(PAL.mantis, 1); you.position.set(0.4, 0.55, -4.8); you.rotation.y = 0.2;
     you.traverse((o) => { if (o.material) { o.material = o.material.clone(); o.material.emissiveIntensity = 0.1; o.material.color.set(0x4a4a5a); } });
     s.add(you);
+
+    // The sketchy guy — Steve's man, loitering by the doors in a long coat and
+    // a wide-brim hat. The "sketchyCall" scene finds him (takes.js).
+    const sg = new THREE.Group();
+    const coatM = mat(0x17120c, PAL.gold, 0.07, 0.85);
+    const coat = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.34, 1.15, 12), coatM);
+    coat.position.y = 0.62; sg.add(coat);
+    const sgHead = sph(0.17, mat(0x14100a, PAL.gold, 0.1, 0.8)); sgHead.position.y = 1.35; sg.add(sgHead);
+    const brim = cyl(0.3, 0.3, 0.035, coatM); brim.position.y = 1.45; sg.add(brim);
+    const crown = cyl(0.15, 0.17, 0.16, coatM); crown.position.y = 1.54; sg.add(crown);
+    sg.position.set(-2.45, 0, -6.55); sg.rotation.y = 0.55; sg.rotation.z = -0.05; // leaning, up to something
+    s.add(sg);
     return s;
   }
 }
@@ -375,6 +381,40 @@ function figure(accent, dir) {
   const shinR = cyl(0.06, 0.06, 0.55, skin); shinR.position.set(0.12, 0.62, 0.46 * dir); g.add(shinR);
   const armL = cyl(0.055, 0.055, 0.5, skin); armL.position.set(-0.18, 1.28, 0.06 * dir); armL.rotation.z = 0.5; g.add(armL);
   const armR = cyl(0.055, 0.055, 0.5, skin); armR.position.set(0.18, 1.28, 0.06 * dir); armR.rotation.z = -0.5; g.add(armR);
+  return g;
+}
+
+// A standing crew figure (legs, coat/torso, head) with a small accent glow.
+function standingFigure(clothes, accent, glow) {
+  const g = new THREE.Group();
+  const m = mat(clothes, accent, glow, 0.75);
+  const legL = cyl(0.06, 0.07, 0.72, m); legL.position.set(-0.11, 0.36, 0); g.add(legL);
+  const legR = cyl(0.06, 0.07, 0.72, m); legR.position.set(0.11, 0.36, 0); g.add(legR);
+  const torso = cyl(0.14, 0.17, 0.68, m); torso.position.y = 1.06; g.add(torso);
+  const armL = cyl(0.05, 0.05, 0.52, m); armL.position.set(-0.22, 1.1, 0.02); armL.rotation.z = 0.35; g.add(armL);
+  const armR = cyl(0.05, 0.05, 0.52, m); armR.position.set(0.22, 1.1, 0.02); armR.rotation.z = -0.6; g.add(armR);
+  const head = sph(0.17, mat(0xd9cdb8, accent, glow * 0.6, 0.6)); head.position.y = 1.56; g.add(head);
+  return g;
+}
+
+// An original piggy bank on a lit pedestal — the show's coin vault mascot.
+function piggyBank(x, z) {
+  const g = new THREE.Group();
+  const pedestal = cyl(0.5, 0.62, 1.0, mat(0x101020, 0x1FDDE9, 0.25, 0.4, 0.6)); pedestal.position.y = 0.5; g.add(pedestal);
+  const top = cyl(0.56, 0.5, 0.08, mat(0x000000, 0xFFC857, 0.8)); top.position.y = 1.02; g.add(top);
+  const goldM = mat(0xffc857, 0xFFC857, 0.42, 0.35, 0.35);
+  const body = sph(0.42, goldM); body.scale.set(1.18, 0.92, 1); body.position.y = 1.48; g.add(body);
+  const snout = cyl(0.13, 0.16, 0.14, goldM); snout.rotation.z = Math.PI / 2; snout.position.set(-0.52, 1.44, 0); g.add(snout);
+  const earL = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.16, 8), goldM); earL.position.set(-0.2, 1.86, 0.17); g.add(earL);
+  const earR = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.16, 8), goldM); earR.position.set(-0.2, 1.86, -0.17); g.add(earR);
+  for (const [lx, lz] of [[-0.24, 0.2], [0.24, 0.2], [-0.24, -0.2], [0.24, -0.2]]) {
+    const leg = cyl(0.07, 0.08, 0.18, goldM); leg.position.set(lx, 1.12, lz); g.add(leg);
+  }
+  const slot = box(0.2, 0.03, 0.06, mat(0x0a0a14, 0x000000, 0, 0.5)); slot.position.set(0.05, 1.88, 0); g.add(slot);
+  const tail = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.022, 6, 14, Math.PI * 1.4), goldM);
+  tail.position.set(0.52, 1.52, 0); tail.rotation.y = Math.PI / 2; g.add(tail);
+  g.position.set(x, 0, z);
+  g.rotation.y = 0.5; // snout angled toward the stage center
   return g;
 }
 
