@@ -68,10 +68,10 @@ export function resetAll() {
 }
 
 // Prestige: winning resets coins and purchased slots ONLY. Mastery + flags persist.
+// The win itself is tallied in the run controller flow (endRun), not here, so a
+// win counts whether or not the player chooses to prestige afterwards.
 export function prestige(state) {
-  const next = { ...state, wallet: 0, lifelines: defaultLifelines() };
-  next.stats = { ...state.stats, wins: (state.stats?.wins || 0) + 1 };
-  return next;
+  return { ...state, wallet: 0, lifelines: defaultLifelines() };
 }
 
 function migrate(parsed) {

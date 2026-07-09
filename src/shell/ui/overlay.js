@@ -24,6 +24,7 @@ export class QuizScreen {
   }
 
   mount(root, hudEl) {
+    clear(root); // replace whatever screen was showing (title/green room), don't stack on it
     clear(this.el);
     this.el.append(hudEl);
     this.card = h('div', { class: 'q-card' });

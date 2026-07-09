@@ -106,6 +106,10 @@ export class Game {
     clear(this.roots.screen);
     this.roots.screen.append(el);
     this.roots.screen.scrollTop = 0;
+    // Move focus to the new screen's heading so keyboard/screen-reader users
+    // land in the right place after navigation.
+    const focusTarget = el.querySelector('h1, h2') || el;
+    if (focusTarget) { focusTarget.setAttribute('tabindex', '-1'); focusTarget.focus({ preventScroll: true }); }
   }
 
   showTitle() {
@@ -283,6 +287,7 @@ export class Game {
     const pay = won ? result.payout : (result ? result.payout : payout({ clearedCount: this.rc.clearedCount, won: false }));
     this.save.wallet += pay || 0;
     this.save.stats.runs += 1;
+    if (won) this.save.stats.wins += 1;
     this.save.stats.bestPayout = Math.max(this.save.stats.bestPayout, pay || 0);
     this.save.stats.longestStreak = Math.max(this.save.stats.longestStreak, this.rc.clearedCount);
     // Advance the mastery campaign's double buffer for the next run.

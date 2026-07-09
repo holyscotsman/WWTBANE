@@ -45,6 +45,8 @@ async function main() {
     await page.goto(base, { waitUntil: 'load', timeout: 20000 });
     await page.waitForSelector('.brand-main', { timeout: 10000 });
     await page.click('button.primary.big'); // start mastery run
+    await page.waitForSelector('.q-card .stem', { timeout: 10000 });
+    check('starting a run replaces the title screen (no leftover menu behind the quiz)', !(await page.$('.title-screen')));
 
     let guard = 0; let won = false;
     while (guard++ < 40) {

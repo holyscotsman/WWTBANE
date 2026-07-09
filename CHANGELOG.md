@@ -24,3 +24,11 @@ Added the whole first end-to-end game, hostable as static files on GitHub Pages.
   site makes **no external requests**.
 - **Docs**: `CLAUDE.md`, cinematic spec (incl. the §10 event contract), content
   QA report, and the state/flag/backlog/QA files.
+
+### Fixes & polish
+- Starting a run now clears the previous screen — the title/green-room menu no
+  longer lingers behind the quiz card. Added an E2E regression guard.
+- A win is tallied whether or not the player chooses to prestige afterwards
+  (moved the counter out of `prestige`).
+- Focus moves to the new screen's heading on navigation (keyboard / screen reader).
+- Added a GitHub Actions workflow that runs the headless suite on every push and PR.
