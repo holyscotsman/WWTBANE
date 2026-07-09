@@ -14,7 +14,12 @@ async function main() {
   const server = await serve(PORT);
   const errors = [];
   const browser = await pw.chromium.launch(launchArgs());
-  const page = await browser.newPage({ viewport: { width: 1100, height: 800 } });
+  const context = await browser.newContext({ viewport: { width: 1100, height: 800 } });
+  // Skip the first-run intro cinematic; it has its own e2e coverage.
+  await context.addInitScript(() => { try {
+    localStorage.setItem('wwtbane.save.v1', JSON.stringify({ version: 1, flags: { seenIntro: true } }));
+  } catch {} });
+  const page = await context.newPage();
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console.error: ' + m.text()); });
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
 
@@ -33,6 +38,9 @@ async function main() {
     const optionCount = await page.$$eval('.option', (els) => els.length);
     check('question has options', optionCount >= 4, `${optionCount} options`);
 
+    const rungs = await page.$$eval('.rung', (els) => els.length);
+    check('money ladder has 30 rungs', rungs === 30, `${rungs} rungs`);
+
     await page.click('.lifeline.ll-fifty');
     await page.waitForTimeout(200);
     const removed = await page.$$eval('.option.removed', (els) => els.length);
@@ -41,10 +49,12 @@ async function main() {
     await page.click('.option:not(.removed)');
     await page.click('.lock-btn');
     await page.waitForSelector('.feedback', { timeout: 8000 });
-    check('answering shows feedback and a continue control', !!(await page.$('.continue-btn')));
-
-    const rungs = await page.$$eval('.rung', (els) => els.length);
-    check('money ladder has 30 rungs', rungs === 30, `${rungs} rungs`);
+    // Correct → explanation + continue; wrong → auto-walk to the green room.
+    const followUp = await Promise.race([
+      page.waitForSelector('.continue-btn', { timeout: 6000 }).then(() => 'continue'),
+      page.waitForSelector('.green-room', { timeout: 6000 }).then(() => 'greenroom'),
+    ]).catch(() => null);
+    check('answering leads to feedback and the next step', !!followUp, String(followUp));
 
     check('no console errors or page exceptions', errors.length === 0, errors.slice(0, 4).join(' | '));
   } catch (e) {

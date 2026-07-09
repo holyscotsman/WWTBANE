@@ -21,11 +21,12 @@ async function main() {
 
   const context = await browser.newContext({ viewport: { width: 1100, height: 800 } });
   // Reduced motion (instant camera cuts) + no audio so the 30-question run is fast.
+  // seenIntro skips the first-run cinematic here; scenario 4 covers it separately.
   await context.addInitScript(() => {
     try {
       localStorage.setItem('wwtbane.e2e', '1');
       localStorage.setItem('wwtbane.nogl', '1'); // skip the GPU-bound studio; smoke.mjs covers WebGL boot
-      localStorage.setItem('wwtbane.save.v1', JSON.stringify({ version: 1, settings: { motion: 'reduced', sound: false } }));
+      localStorage.setItem('wwtbane.save.v1', JSON.stringify({ version: 1, flags: { seenIntro: true }, settings: { motion: 'reduced', sound: false, music: false } }));
     } catch {}
   });
   const page = await context.newPage();
@@ -70,7 +71,7 @@ async function main() {
     await page.waitForSelector('.q-card .stem', { timeout: 10000 });
     check('climb again starts a fresh run', true);
 
-    // ---- Scenario 2: lose on purpose, then the green room (fresh page) ----
+    // ---- Scenario 2: lose on purpose → straight to the green room ----
     await page.goto(base, { waitUntil: 'load', timeout: 20000 });
     await page.waitForSelector('.brand-main', { timeout: 8000 });
     await page.click('button.primary.big');
@@ -78,18 +79,17 @@ async function main() {
     const wrong = await page.evaluate(() => { const a = window.__wwt.answer(); for (let i = 0; i < 6; i++) if (!a.includes(i)) return i; return 0; });
     await page.click(`.option[data-i="${wrong}"]`);
     await page.click('.lock-btn');
-    await page.waitForSelector('.feedback.bad', { timeout: 8000 });
-    check('a wrong answer is marked wrong', true);
-    await page.click('.continue-btn');
-    await page.waitForSelector('.result-screen.lose', { timeout: 8000 });
-    check('losing shows the result screen with the answer revealed', !!(await page.$('.reveal-answer')));
-
-    await page.click('.result-screen .primary.big'); // To the green room
-    await page.waitForSelector('.green-room', { timeout: 8000 });
-    check('green room opens with a shop and Steve', !!(await page.$('.shop')) && !!(await page.$('.steve')));
-    await page.click('.green-room .primary.big'); // Enter the studio
+    // No click needed — the game walks you back to the green room by itself
+    // (under reduced motion the wrong-beat is instant), where the correct
+    // answer + explanation are revealed first.
+    await page.waitForSelector('.green-room .reveal-answer', { timeout: 10000 });
+    check('losing goes straight to the green room with the answer revealed', true);
+    await page.click('.green-room .primary.big'); // Got it — to the green room
+    await page.waitForSelector('.shop', { timeout: 8000 });
+    check('after the reveal, the green room offers the shop and Steve', !!(await page.$('.steve')));
+    await page.click('.green-room .primary.big'); // Start next round
     await page.waitForSelector('.q-card .stem', { timeout: 10000 });
-    check('you can enter a new run from the green room', true);
+    check('you can start the next round from the green room', true);
 
     // ---- Scenario 3: seeded run shows the seed ----
     await page.goto(base, { waitUntil: 'load', timeout: 20000 });
@@ -100,6 +100,32 @@ async function main() {
     await page.waitForSelector('.q-card .stem', { timeout: 10000 });
     const seedShown = await page.textContent('.seed-chip');
     check('seeded run displays the seed for sharing', /TESTME/.test(seedShown || ''), seedShown);
+
+    // ---- Scenario 4: first-run intro cinematic (fresh save) ----
+    const ctx2 = await browser.newContext({ viewport: { width: 1100, height: 800 } });
+    await ctx2.addInitScript(() => {
+      try {
+        localStorage.setItem('wwtbane.e2e', '1');
+        localStorage.setItem('wwtbane.nogl', '1');
+        localStorage.setItem('wwtbane.save.v1', JSON.stringify({ version: 1, settings: { motion: 'reduced', sound: false, music: false } }));
+      } catch {}
+    });
+    const p2 = await ctx2.newPage();
+    p2.on('console', (m) => { if (m.type() === 'error') errors.push('intro: ' + m.text()); });
+    p2.on('pageerror', (e) => errors.push('intro pageerror: ' + e.message));
+    await p2.goto(base, { waitUntil: 'load', timeout: 20000 });
+    await p2.waitForSelector('.brand-main', { timeout: 8000 });
+    await p2.click('button.primary.big'); // first-ever start → cinematic
+    await p2.waitForSelector('.cine-panel', { timeout: 8000 });
+    check('the first run opens with the host cinematic', true);
+    await p2.click('.cine-skip');
+    await p2.waitForSelector('.q-card .stem', { timeout: 10000 });
+    check('skipping the intro lands on the first question', true);
+    // The seen-intro flag must persist so later runs go straight in. (A reload
+    // can't be used here — the test's init script resets the save on nav.)
+    const seen = await p2.evaluate(() => { try { return JSON.parse(localStorage.getItem('wwtbane.save.v1')).flags.seenIntro === true; } catch { return false; } });
+    check('the intro is marked seen — later runs go straight in', seen);
+    await ctx2.close();
 
     check('no console errors across all scenarios', errors.length === 0, errors.slice(0, 4).join(' | '));
   } catch (e) {

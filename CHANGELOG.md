@@ -1,5 +1,31 @@
 # Changelog
 
+## Unreleased — music, intro cinematic, and the new loss flow
+
+- **Procedural music** (`src/shell/music.js`): original WebAudio compositions,
+  no files — a relaxed lounge vamp for the main menu + green room; tier loops
+  that start quick and bright on easy and get slower and lower-keyed through
+  medium, hard, and the final's low drone-and-heartbeat; a lifeline "thinking"
+  vamp that plays during a lifeline and hands back to the tier loop after; and
+  stingers — a quick positive hit on a correct answer, a ~3s wrong sound, a
+  ~4s dramatic final-question-wrong, and the win fanfare. Music ducks under
+  stingers and the lock-in suspense. New Music toggle in settings.
+- **Intro cinematic + guided tutorial** (first run only, skippable): a camera
+  tour of the soundstage — audience, host, contestant — then the host walks the
+  player through the ladder, safe havens, lifelines, and locking in, and gives
+  away the first question's answer ("on the house"; marked assisted so it never
+  promotes mastery). Host dialogue flagged for human review in `FLAGS.md`.
+- **Title menu** simplified to "Start new game" and "Enter seed" — the green
+  room is reached through play, not the menu.
+- **New loss flow:** a wrong answer shows "Not this time" and walks straight to
+  the green room, which opens on the correct answer + explanation and a
+  keep-going pep talk before the shop ("Start next round"). The green-room
+  backdrop now has the contestant sitting on the sofa, bored — swaying and
+  tapping a foot.
+- **Stage lighting fixed:** the WebGL studio was too bright — dimmer key
+  lights, gentler bloom, subdued floor spokes and beams, brighter figure
+  accents, so the host, contestant, and audience actually read.
+
 ## Unreleased — Game A redesign
 
 Implemented the full UI redesign from the design handoff (Game A "broadcast"

@@ -506,6 +506,47 @@ li:nth-child(6) > .option { animation-delay: 0.42s; }
 .boot-error { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; text-align: center; padding: 30px; color: var(--peach); background: var(--bg); }
 .fatal { text-align: center; }
 
+/* ============================== intro cinematic ============================== */
+@keyframes cineNext { 0% { opacity: 0.25; } 50% { opacity: 1; } 100% { opacity: 0.25; } }
+.cine-layer { position: fixed; inset: 0; z-index: 20; }
+.cine-panel {
+  /* centered via auto margins — the riseIn animation owns `transform` */
+  position: absolute; left: 0; right: 0; margin: 0 auto; top: clamp(64px, 10vh, 120px);
+  width: min(640px, calc(100vw - 40px));
+  background: rgba(10, 10, 22, 0.88); border: 1px solid rgba(255, 200, 87, 0.35);
+  border-radius: 16px; padding: 16px 20px 14px; backdrop-filter: blur(14px);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 200, 87, 0.08);
+  animation: riseIn 0.4s var(--swift) both;
+}
+.cine-host { display: flex; align-items: center; gap: 7px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 7px; }
+.cine-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px rgba(255, 200, 87, 0.8); }
+.cine-text { margin: 0; font-size: 16px; line-height: 1.6; min-height: 52px; }
+.cine-next { position: absolute; right: 14px; bottom: 10px; color: var(--gold); font-size: 14px; opacity: 0; }
+.cine-next.on { animation: cineNext 1.4s ease-in-out infinite; }
+.cine-skip {
+  position: absolute; top: 18px; right: 18px;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line); color: #c9cbe8;
+  font-weight: 700; font-size: 12.5px; border-radius: 10px; padding: 9px 14px;
+}
+.cine-skip:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* tutorial spotlight on HUD pieces */
+@keyframes tutPulse { 0% { box-shadow: 0 0 0 2px rgba(255,200,87,0.85), 0 0 24px rgba(255,200,87,0.45); } 50% { box-shadow: 0 0 0 3px rgba(255,200,87,1), 0 0 34px rgba(255,200,87,0.65); } 100% { box-shadow: 0 0 0 2px rgba(255,200,87,0.85), 0 0 24px rgba(255,200,87,0.45); } }
+.tut-glow { animation: tutPulse 1.6s ease-in-out infinite; border-radius: 14px; position: relative; z-index: 21; }
+
+/* wrong-answer banner (auto-continues to the green room) */
+.feedback.bad .fb-note { color: var(--muted); font-size: 12.5px; }
+
+/* ============================== bored contestant (green room) ============================== */
+@keyframes boredSway { 0%, 100% { transform: rotate(0deg) translateY(0); } 30% { transform: rotate(-1.6deg) translateY(1px); } 60% { transform: rotate(1.1deg) translateY(0); } 80% { transform: rotate(-0.6deg) translateY(1px); } }
+@keyframes boredTap { 0%, 84%, 100% { transform: translateY(0); } 88% { transform: translateY(-3px); } 92% { transform: translateY(0); } 96% { transform: translateY(-2px); } }
+.bd-contestant { position: absolute; left: 50%; bottom: 128px; width: 90px; height: 120px; transform: translateX(-70%); transform-origin: bottom center; animation: boredSway 9s ease-in-out infinite; }
+.bd-contestant .c-head { position: absolute; left: 50%; top: 0; width: 30px; height: 30px; margin-left: -15px; border-radius: 50%; background: #0b0704; box-shadow: 2px -1px 0 0.5px rgba(255, 214, 138, 0.35); }
+.bd-contestant .c-body { position: absolute; left: 50%; top: 27px; width: 52px; height: 52px; margin-left: -26px; border-radius: 16px 16px 8px 8px; background: #0d0805; box-shadow: 2px -1px 0 0.5px rgba(255, 214, 138, 0.25); }
+.bd-contestant .c-leg { position: absolute; top: 72px; width: 14px; height: 46px; border-radius: 7px; background: #0b0704; }
+.bd-contestant .c-leg.l1 { left: 22px; }
+.bd-contestant .c-leg.l2 { left: 50px; animation: boredTap 5.5s ease-in-out infinite; transform-origin: top center; }
+
 /* ============================== responsive (mobile) ============================== */
 @media (max-width: 900px) {
   .q-card-wrap { max-width: calc(100vw - 246px); }
