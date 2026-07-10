@@ -15,7 +15,7 @@ import { pickWelcome, pickQuestionLine } from './hostLines.js';
 
 import * as persistence from './persistence.js';
 import { GameAudio } from './audio.js';
-import { Music } from './music.js';
+import { Music, MUSIC_STYLES } from './music.js';
 import { CssBackdrop } from './backdrop.js';
 import { Hud } from './ui/hud.js';
 import { QuizScreen } from './ui/overlay.js';
@@ -31,7 +31,7 @@ export class Game {
     this.bus = createBus();
     this.save = persistence.load();
     this.audio = new GameAudio({ enabled: this.save.settings.sound });
-    this.music = new Music({ enabled: this.save.settings.music !== false });
+    this.music = new Music({ enabled: this.save.settings.music !== false, style: this.save.settings.musicStyle || 'studio' });
     this.bank = null;
     this.campaign = null;      // persistent mastery SetManager
     this.rc = null;
@@ -482,10 +482,16 @@ export class Game {
     const challengeUrl = seed
       ? `${location.origin}${location.pathname}?seed=${encodeURIComponent(seed)}`
       : null;
+    const styleSel = h('label', { class: 'setting' },
+      h('select', { class: 'motion-select', 'aria-label': 'Music style',
+        onchange: (e) => { this.save.settings.musicStyle = e.target.value; this._applySettings(); this.persist(); } },
+        ...MUSIC_STYLES.map((s) => h('option', { value: s.id, selected: (this.save.settings.musicStyle || 'studio') === s.id }, s.label))),
+      h('span', {}, h('b', {}, 'Music style'), h('span', { class: 'muted small' }, 'Switches instantly.')));
     const panel = h('section', { class: 'pause-panel panel', role: 'dialog', 'aria-label': 'Pause menu' },
       h('h2', { class: 'screen-title' }, 'Paused'),
       toggle('music', 'Music', 'The lounge and tier loops.'),
       toggle('sound', 'Sound effects', 'Picking, locking, lifelines.'),
+      styleSel,
       h('p', { class: 'muted small audio-status' }, this._audioStatus()),
       h('div', { class: 'pause-seed' },
         seed
@@ -636,6 +642,9 @@ export class Game {
     if (this.studio) this.studio.reduced = this.reduced;
     this.audio.setEnabled(this.save.settings.sound);
     this.music.setEnabled(this.save.settings.music !== false);
+    if (this.music.style !== (this.save.settings.musicStyle || 'studio')) {
+      this.music.setStyle(this.save.settings.musicStyle || 'studio');
+    }
     if (this.save.settings.music !== false) {
       if (this.screen === 'title' || this.screen === 'greenroom') {
         this.music.play('lounge');
