@@ -41,8 +41,14 @@ audio-resume hardening, pause menu, mastery dashboard removed).
   green room (reveal + pep talk → shop, "Start next round"); win → prestige.
 
 ### Gates
-- Tests: 63 headless (negative controls) + 7 smoke + 18 e2e; CI runs headless
+- Tests: 71 headless (negative controls) + 7 smoke + 18 e2e; CI runs headless
   on every push/PR. All green as of the last drop.
+
+### Owner-authored bank (in progress)
+- Ingestion pipeline is live: `docs/QUESTION_AUTHORING.md` → Markdown →
+  `npm run import:questions` → `src/content/questions.js`. Waiting on the
+  owner's Markdown upload (+ images in `src/content/images/`) to replace the
+  AI-drafted bank. Run the importer, review its report, then ship.
 - Visual sign-off queue: `BROWSER_QA.md` (code-complete, visual-pending).
 
 ## Next candidates

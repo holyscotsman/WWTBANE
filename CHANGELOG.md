@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased — Markdown question-bank ingestion
+
+- **Author the bank in Markdown.** New pure parser (`parseMarkdownBank.js`)
+  and importer (`scripts/import-questions.mjs`, `npm run import:questions`)
+  turn a Markdown file — one `## Qn` heading per question, options as
+  `- [ ]`/`- [x]`, labelled `**Domain/Difficulty/Explanation/…**` fields —
+  into `src/content/questions.js`. Every question is validated with the SAME
+  schema the game uses at boot; the importer refuses to overwrite the bank if
+  anything fails or the tiers can't fill a full run (unless `--force`).
+- IDs auto-generate per domain/difficulty; single vs multi is inferred from
+  the number of `[x]` marks; image files resolve from `src/content/images/`.
+- Owner-provided questions import as `reviewStatus: "human-reviewed"` — the
+  path to finally clearing the question-bank review flag (`FLAGS.md`).
+- Docs: `docs/QUESTION_AUTHORING.md` (spec, template, and a ready-to-paste
+  prompt for structuring questions in another chat), a format example, and an
+  images folder README. Parser tested with negative controls (no key marked,
+  image missing alt, too few options, empty input).
+- The runtime still never uses AI to grade — the authored `[x]` is
+  authoritative (CLAUDE.md §4).
+
 ## Unreleased — the living studio: faces, crowd, cameras + audio fixes
 
 - **Animated faces and idle life** — everyone (host, contestant, stage

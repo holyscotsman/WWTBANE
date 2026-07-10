@@ -3,17 +3,18 @@
 Things the autonomous loop **cannot** decide. Nothing here blocks a playable
 ship, but each wants a human before it's "done" per `CLAUDE.md`.
 
-## 1. Question bank — final human review (content integrity)
-- **What:** the 157 shipped questions in `src/content/questions.js` and the
-  Steve / Phone-a-Friend clues were **AI-drafted and independently AI-verified**
-  as the §4-sanctioned offline ingestion QA, then marked `reviewStatus:"verified"`.
-- **Why flagged:** `CLAUDE.md §4/§7` require answer keys and teaching dialogue to
-  be **human-authored or human-reviewed** before they truly ship.
-- **Ask:** a human spot-checks the bank against current Nutanix docs and signs
-  off (or edits). See `docs/CONTENT_QA_REPORT.md` for the pipeline outcome and a
-  checklist. Quarantined duplicates are in `src/content/quarantine.js`.
-- **Note:** this only concerns *content quality*. The **runtime never uses AI to
-  grade** — correctness is decided solely by the stored authored key.
+## 1. Question bank — being replaced with owner-authored content
+- **Status:** the owner is supplying their **own** question bank (some items
+  with images), to replace the current 157 AI-drafted questions. The ingestion
+  path is built: author in Markdown per `docs/QUESTION_AUTHORING.md`, then
+  `npm run import:questions <file.md>` regenerates `src/content/questions.js`
+  (schema-validated; won't ship a broken key). Owner questions import as
+  `reviewStatus:"human-reviewed"`.
+- **What's left:** the owner uploads the Markdown (+ image files); the current
+  AI-drafted bank stands in until then. Once imported, this flag is cleared —
+  the bank becomes human-authored, which is what §4/§7 require.
+- **Note:** the **runtime never uses AI to grade** — correctness is decided
+  solely by the stored authored key, before and after the swap.
 
 ## 2. Host dialogue — intro cinematic, welcome lines, quips (authored content)
 - **What:** the first-run cinematic (`src/shell/ui/cinematic.js`) contains host
