@@ -18,6 +18,10 @@
   unspecced idea in `BACKLOG.md`. Promote a backlog item here once specced._
 
 ### Done (recent)
+- Markdown question-bank ingestion: `parseMarkdownBank.js` + `npm run
+  import:questions` turn an authored `.md` (spec in
+  `docs/QUESTION_AUTHORING.md`) into the validated game bank. Ready for the
+  owner to upload their own questions/images.
 - Save export/import: Settings exports the save as a portable code and imports
   one (confirm-gated, migrate-normalized, garbage-rejected).
 - Question image hook: schema field (`image {src, alt, caption?}` — local-only,
