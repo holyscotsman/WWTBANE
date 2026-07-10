@@ -5,6 +5,7 @@
 import { h, money } from './dom.js';
 import { LIFELINE_TYPES, LIFELINE_META, LIFELINE_MAX_SLOTS, SHOP } from '../../core/config.js';
 import { letter } from '../../core/lifelines.js';
+import { MUSIC_STYLES } from '../music.js';
 
 const GOLD = '#FFC857', AQUA = '#1FDDE9', IRIS = '#7855FA';
 
@@ -224,6 +225,11 @@ export function SettingsScreen(ctx) {
     toggle('highContrast', 'High contrast', 'Boost text and outline contrast.'),
     toggle('sound', 'Sound effects', 'Short cues for picking, locking, and lifelines.'),
     toggle('music', 'Music', 'Original synth score: lounge in the green room, tier loops that slow and darken as the money climbs.'),
+    h('label', { class: 'setting' },
+      h('select', { class: 'motion-select', 'aria-label': 'Music style',
+        onchange: (e) => ctx.onChange('musicStyle', e.target.value) },
+        ...MUSIC_STYLES.map((s) => h('option', { value: s.id, selected: (ctx.settings.musicStyle || 'studio') === s.id }, s.label))),
+      h('span', {}, h('b', {}, 'Music style'), h('span', { class: 'muted small' }, 'Pick an arrangement — the change is audible right away. Same original score, different voice.'))),
     ctx.audioStatus ? h('p', { class: 'muted small audio-status' }, ctx.audioStatus) : null,
     toggle('extraTime', 'No timers', 'There is never a countdown; this keeps it that way if timers are ever added.'),
     h('div', { class: 'save-transfer' },

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased — music variations (selectable arrangements)
+
+- **Pick your arrangement.** A new music-style selector (Settings and the
+  pause menu) switches the whole score between **Studio (original)**, **Neon
+  synthwave**, **Mellow lounge**, and **8-bit arcade** — each a transform of
+  the same original compositions (tempo, instrument timbre, dynamics), so it's
+  a different voice, not different music. The change is audible immediately and
+  persists in the save. Still original synth only (CLAUDE.md §6).
+- Implemented as a pure `styleTrack(track, styleId)` transform (notes arrays
+  are shared read-only, so no per-tick allocation); headless-tested with
+  negative controls (studio = identity, unknown style = no-op, notes never
+  mutated).
+
 ## Unreleased — lifeline overhaul: Phone-a-Friend cutscene, fallible audience
 
 - **Phone a Friend is now a ~10s cutscene** — the friend picks up, panics

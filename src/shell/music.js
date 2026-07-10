@@ -157,14 +157,61 @@ const TRACKS = {
 const LOOKAHEAD_S = 0.28;
 const TICK_MS = 60;
 
+// Selectable arrangements ("music variations"). Each is a transform over the
+// base tracks — tempo, instrument timbre, and dynamics — so the same
+// compositions play in a clearly different voice. Still original synth only
+// (CLAUDE.md §6). 'studio' is the untouched original.
+export const MUSIC_STYLES = [
+  { id: 'studio', label: 'Studio (original)' },
+  { id: 'neon',   label: 'Neon synthwave' },
+  { id: 'mellow', label: 'Mellow lounge' },
+  { id: 'arcade', label: '8-bit arcade' },
+];
+const STYLE_DEF = {
+  studio: null, // identity
+  neon:   { bpmMul: 1.06, wave: 'sawtooth', bassWave: 'sawtooth', cutoff: 1600, gainMul: 1.0, drumMul: 1.15 },
+  mellow: { bpmMul: 0.9,  wave: 'triangle', bassWave: 'sine',     cutoff: 900,  gainMul: 0.92, drumMul: 0.4 },
+  arcade: { bpmMul: 1.08, wave: 'square',   bassWave: 'triangle',               gainMul: 0.82, drumMul: 1.0 },
+};
+const MELODIC = new Set(['bass', 'arp', 'lead', 'pad', 'chord']);
+const PERC = new Set(['hat', 'thump']);
+
+// Pure: return a styled copy of a track. Notes arrays are shared (read-only),
+// so this allocates only the small voice wrappers — safe to call on play().
+export function styleTrack(track, styleId) {
+  const S = STYLE_DEF[styleId];
+  if (!S) return track; // studio / unknown → original
+  const voices = track.voices.map((v) => {
+    const nv = { ...v };
+    if (MELODIC.has(v.kind)) {
+      if (S.wave) nv.wave = v.kind === 'bass' && S.bassWave ? S.bassWave : S.wave;
+      if (S.cutoff && !v.cutoff) nv.cutoff = S.cutoff;
+      if (S.gainMul != null) nv.gain = (v.gain || 0.2) * S.gainMul;
+    } else if (PERC.has(v.kind) && S.drumMul != null) {
+      nv.gain = (v.gain || 0.2) * S.drumMul;
+    }
+    return nv;
+  });
+  return { ...track, bpm: Math.round(track.bpm * (S.bpmMul || 1)), voices };
+}
+
 export class Music {
-  constructor({ enabled = true } = {}) {
+  constructor({ enabled = true, style = 'studio' } = {}) {
     this.enabled = enabled;
+    this.style = STYLE_DEF[style] !== undefined ? style : 'studio';
     this.ctx = null;
     this.currentName = null;
     this.stack = [];
     this._loop = null; // { track, spb, loopStart, nextEventIdx flattened }
     this._timer = null;
+  }
+
+  // Switch the arrangement. If something is looping, re-render it in the new
+  // style right away so the change is audible immediately.
+  setStyle(styleId) {
+    if (STYLE_DEF[styleId] === undefined) return;
+    this.style = styleId;
+    if (this.currentName) { const n = this.currentName; this.currentName = null; this.play(n); }
   }
 
   _ensure() {
@@ -204,7 +251,7 @@ export class Music {
     this.resume();
     this._fadeOutCurrent();
     this.currentName = name;
-    const track = TRACKS[name];
+    const track = styleTrack(TRACKS[name], this.style);
     const spb = 60 / track.bpm;
     const gain = this.ctx.createGain();
     gain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
