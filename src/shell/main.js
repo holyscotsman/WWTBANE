@@ -23,7 +23,7 @@ import { QuizScreen } from './ui/overlay.js';
 import { Cinematic } from './ui/cinematic.js';
 import { playSteveCutscene } from './ui/steveCutscene.js';
 import { TitleScreen, GreenRoom, ResultScreen, HelpScreen, SettingsScreen } from './ui/screens.js';
-import { h, clear } from './ui/dom.js';
+import { h, clear, money } from './ui/dom.js';
 
 import { QUESTIONS } from '../content/questions.js';
 
@@ -72,8 +72,8 @@ export class Game {
     const params = new URLSearchParams(window.location.search);
     if (params.has('scene')) return this._previewMode(params);
 
-    // Dev tools: ?dev=1 turns on the developer options (persisted). They live in
-    // Settings and are never shown to normal players.
+    // Dev tools: normally toggled on from Settings ("Developer tools"). ?dev=1 is
+    // a convenience shortcut that flips the same persisted flag.
     if (params.get('dev') === '1' && !this.save.settings.dev) { this.save.settings.dev = true; this.persist(); }
 
     // Validate the shipped bank; play with whatever is structurally valid.
@@ -288,7 +288,7 @@ export class Game {
       dev: !!this.save.settings.dev,
       wallet: this.save.wallet,
       onDevAddCoins: (n) => { this.save.wallet = Math.max(0, this.save.wallet + n); this.persist(); this.showSettings(); },
-      onDevDisable: () => { this.save.settings.dev = false; this.persist(); this.showSettings(); },
+      onDevStartAt: (n) => this._devStartAt(n),
       onChange: (k, v) => { this.save.settings[k] = v; this._applySettings(); this.persist(); this.showSettings(); },
       onReset: () => {
         if (!confirm('Reset ALL progress? This wipes your mastery, coins, lifelines and history and starts you over as a first-time player (the intro plays again). This cannot be undone.')) return;
@@ -462,22 +462,29 @@ export class Game {
     });
     this.hud.setSeed && this.hud.setSeed(seed);
 
+    // A pending dev jump (from "Start run at question N") skips the intro/welcome
+    // and drops straight onto the chosen question.
+    const devJump = this._devJumpTarget; this._devJumpTarget = null;
+
     const beginPlay = () => {
       this._wipe(); // branded transition into the studio
       this._lastShownTier = null; // fresh run: the first tier crossing is Q11
       this.screen = 'quiz';
       this.quiz.mount(this.roots.screen, this.hud.el);
       this.audio.resume();
-      const cur = this.rc.start();
+      this.rc.start();
+      const cur = devJump && devJump > 1 ? this.rc.devJumpTo(devJump) : this.rc.current();
       this.quiz.showQuestion(cur, this.rc.snapshot());
       this.hud.update(this.rc.snapshot());
-      this._announce(`Question 1 of 30. ${cur.q.stem}`);
+      this._announce(`Question ${cur.number} of 30. ${cur.q.stem}`);
     };
 
     // First run ever: the host gives a tour of the soundstage, then walks the
     // player through the UI on the real first question (and gives the answer).
     // Every run after that opens with him welcoming the player back instead.
-    if (!this.save.flags.seenIntro) this._playIntro(beginPlay);
+    // A dev jump skips the ceremony so playtesting is one click.
+    if (devJump) beginPlay();
+    else if (!this.save.flags.seenIntro) this._playIntro(beginPlay);
     else this._welcomeBeat(beginPlay);
   }
 
@@ -566,6 +573,7 @@ export class Game {
           ? [h('span', { class: 'muted small' }, 'Seed — anyone who plays it gets this exact run'),
              h('code', {}, seed), copier('Copy seed', seed), copier('Copy challenge link', challengeUrl)]
           : h('span', { class: 'muted small' }, 'Mastery run — questions adapt to you, so there is no seed to share. Use "Enter seed" on the title screen for a replayable run.')),
+      this.save.settings.dev ? this._pauseDevBlock() : null,
       h('div', { class: 'menu' },
         h('button', { class: 'primary', type: 'button', onclick: () => this._closePause() }, 'Resume'),
         h('button', { class: 'ghost small', type: 'button', onclick: () => {
@@ -581,6 +589,37 @@ export class Game {
   _closePause() {
     if (this._pauseEl) { this._pauseEl.remove(); this._pauseEl = null; }
     if (this.quiz) this.quiz.onResume(); // re-arm any parked lock-in submit
+  }
+
+  // Playtesting block for the pause menu (settings.dev only): add coins and jump
+  // to any question in the current run. Coins land in the between-run wallet.
+  _pauseDevBlock() {
+    const walletLabel = h('span', { class: 'muted small' }, `Wallet: ${money(this.save.wallet)} coins`);
+    const addCoins = (n) => {
+      this.save.wallet = Math.max(0, this.save.wallet + n);
+      this.persist();
+      walletLabel.textContent = `Wallet: ${money(this.save.wallet)} coins`;
+    };
+    const jumpInput = h('input', {
+      id: 'dev-jump-input', class: 'dev-jump', type: 'number', min: '1', max: '30',
+      value: String(this.rc ? this.rc.current().number : 1), 'aria-label': 'Jump to question number',
+    });
+    const jump = () => {
+      const n = parseInt(jumpInput.value, 10);
+      if (!Number.isFinite(n)) return;
+      this._closePause();
+      this.devJumpTo(n);
+    };
+    return h('div', { class: 'dev-tools' },
+      h('b', {}, '🛠 Developer'),
+      walletLabel,
+      h('div', { class: 'dev-row' },
+        h('button', { class: 'secondary small', type: 'button', onclick: () => addCoins(1000) }, '+1,000 coins'),
+        h('button', { class: 'secondary small', type: 'button', onclick: () => addCoins(10000) }, '+10,000 coins')),
+      h('div', { class: 'dev-row' },
+        h('label', { class: 'muted small', for: 'dev-jump-input' }, 'Jump to question'),
+        jumpInput,
+        h('button', { class: 'secondary small', type: 'button', onclick: jump }, 'Go')));
   }
 
   _playIntro(beginPlay) {
@@ -614,6 +653,27 @@ export class Game {
     this.quiz.applyLifeline(out.type, out.payload);
     this.hud.update(this.rc.snapshot());
     this.persist(); // charge spent
+  }
+
+  /* ---------------- dev tools (settings.dev) ---------------- */
+
+  // Start a fresh mastery run and drop straight onto question N. Used from the
+  // Settings dev panel (there is no active run there). The jump itself happens
+  // in startRun's beginPlay via _devJumpTarget.
+  _devStartAt(n) {
+    this._devJumpTarget = Math.max(1, Math.min(30, Math.floor(n) || 1));
+    this.startRun('mastery', null); // beginPlay replaces the settings screen
+  }
+
+  // Jump the CURRENT run to question N (from the pause menu). Clears any parked
+  // lock-in so a stale submit can't fire against the new question.
+  devJumpTo(n) {
+    if (!this.rc) return;
+    if (this.quiz) this.quiz.abortPending();
+    const cur = this.rc.devJumpTo(n);
+    this.quiz.showQuestion(cur, this.rc.snapshot());
+    this.hud.update(this.rc.snapshot());
+    this._announce(`Question ${cur.number} of 30. ${cur.q.stem}`);
   }
 
   answer(indices) {

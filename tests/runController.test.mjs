@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { RunController, defaultLifelines, sameSet } from '../src/core/runController.js';
 import { buildSet } from '../src/core/selection.js';
+import { bankedAfter } from '../src/core/coins.js';
 import { emptyMastery, getRecord } from '../src/core/mastery.js';
 import { makeBank } from './fixtures.mjs';
 
@@ -76,6 +77,41 @@ test('a lifeline cannot be used twice on the same question', () => {
   assert.equal(rc.canUseLifeline('audience'), false);
   assert.equal(rc.useLifeline('audience'), null); // NEGATIVE CONTROL
   assert.equal(rc.lifelines.audience.charges, 0);
+});
+
+test('devJumpTo lands on the requested question and credits the coin math', () => {
+  const { rc, events } = freshRun();
+  rc.start();
+  events.length = 0;
+  const cur = rc.devJumpTo(18); // 1-based
+  assert.equal(cur.number, 18);
+  assert.equal(cur.index, 17);
+  assert.equal(cur.tier, 'medium');
+  assert.equal(rc.clearedCount, 17); // prior questions treated as cleared
+  assert.equal(rc.snapshot().banked, bankedAfter(17)); // coin math follows clearedCount
+  assert.ok(rc.snapshot().banked > 0, 'past the first safe haven'); // NEGATIVE CONTROL vs a fresh run
+  assert.equal(rc.alive, true);
+  // It emits a normal question:show so the shell/backdrop react like any move.
+  assert.ok(events.some(([t, d]) => t === 'question:show' && d.number === 18));
+});
+
+test('devJumpTo clamps out-of-range inputs and ignores garbage', () => {
+  const { rc } = freshRun();
+  rc.start();
+  assert.equal(rc.devJumpTo(999).number, 30); // clamp high
+  assert.equal(rc.devJumpTo(0).number, 1);    // clamp low
+  assert.equal(rc.devJumpTo(-5).number, 1);   // clamp low // NEGATIVE CONTROL
+  rc.devJumpTo(12);
+  assert.equal(rc.devJumpTo(NaN).number, 12); // garbage is a no-op // NEGATIVE CONTROL
+});
+
+test('devJumpTo does not grade — mastery is untouched by the jump', () => {
+  const { rc, mastery } = freshRun();
+  rc.start();
+  const q = rc.set[17];
+  const before = JSON.stringify(getRecord(mastery, q.id));
+  rc.devJumpTo(18);
+  assert.equal(JSON.stringify(getRecord(mastery, q.id)), before); // NEGATIVE CONTROL
 });
 
 test('multi-answer grading is all-or-nothing', () => {

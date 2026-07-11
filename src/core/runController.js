@@ -187,6 +187,25 @@ export class RunController {
     return result;
   }
 
+  // Dev-only: jump straight to a 1-based question number for playtesting. Every
+  // prior question is treated as cleared so the coin math (running/banked) reads
+  // like a real run that got this far. Never wired into normal play — the UI
+  // gates it behind settings.dev. Emits 'question:show' like any other move.
+  devJumpTo(number) {
+    const n = Math.floor(number);
+    if (!Number.isFinite(n)) return this.current();
+    const target = Math.max(0, Math.min(this.set.length - 1, n - 1));
+    this.index = target;
+    this.clearedCount = target;   // prior questions count as cleared
+    this.alive = true;
+    this.won = false;
+    this.assisted = false;
+    this.usedThisQuestion = new Set();
+    this.lifelineOutput = {};
+    this._show();
+    return this.current();
+  }
+
   // Move to the next question (after feedback). Emits 'question:show'.
   advance() {
     if (!this.alive || this.won) return null;

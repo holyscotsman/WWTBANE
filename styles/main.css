@@ -608,7 +608,9 @@ li:nth-child(6) > .option { animation-delay: 0.42s; }
 /* developer tools (?dev=1) — only rendered when dev mode is on */
 .dev-tools { display: flex; flex-direction: column; gap: 7px; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(146, 221, 35, 0.4); }
 .dev-tools > b { color: var(--mantis); }
-.dev-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.dev-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.dev-jump { width: 68px; padding: 6px 8px; font: 700 14px var(--mono); text-align: center; color: var(--ink); background: rgba(4, 4, 10, 0.55); border: 1px solid var(--line); border-radius: 8px; }
+.dev-jump:focus-visible { outline: 2px solid var(--mantis); outline-offset: 1px; }
 
 /* dev-only FPS meter (?fps=1 / Alt+F) */
 .fps-meter { position: fixed; right: 8px; bottom: 8px; z-index: 60; font-family: var(--mono); font-size: 11px; font-weight: 700; color: #92DD23; background: rgba(4, 4, 10, 0.82); border: 1px solid var(--line); border-radius: 8px; padding: 4px 9px; pointer-events: none; letter-spacing: 0.02em; }
