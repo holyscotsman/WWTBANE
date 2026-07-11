@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultSave, exportString, importString, prestige } from '../src/shell/persistence.js';
+import { defaultSave, exportString, importString, prestige, resetAll } from '../src/shell/persistence.js';
 import { SAVE_VERSION } from '../src/core/config.js';
 
 test('export → import round-trips a save (mastery, wallet, stats survive)', () => {
@@ -35,6 +35,16 @@ test('the save version is stamped from SAVE_VERSION and migrate normalizes it', 
   // unnormalized (both load() and importString() route through it).
   const back = importString(exportString(defaultSave()));
   assert.equal(back.version, SAVE_VERSION);
+});
+
+test('reset returns a first-time save — the intro replays and nothing carries over', () => {
+  const fresh = resetAll();
+  assert.equal(fresh.flags.seenIntro, false, 'the first-run intro plays again');
+  assert.equal(fresh.flags.reachedFinalBefore, false, 'the impossible-final gate resets too');
+  assert.equal(fresh.wallet, 0);
+  assert.equal(Object.keys(fresh.mastery.records).length, 0, 'mastery wiped'); // NEGATIVE CONTROL vs prestige (which keeps it)
+  assert.equal(fresh.lifelines.fifty.slots, 1, 'purchased slots gone');
+  assert.deepEqual(fresh.steveTaught, []);
 });
 
 test('prestige keeps mastery but resets wallet and slots (import-safe)', () => {

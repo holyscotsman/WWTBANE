@@ -126,3 +126,30 @@ function toPercents(shares) {
 
 function argmax(arr) { let bi = 0; for (let i = 1; i < arr.length; i++) if (arr[i] > arr[bi]) bi = i; return bi; }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+// Turn a poll (`bars` from askAudience) into `n` individual ballots — one per
+// audience member — so the studio can colour that many vote cards, with the
+// per-option counts proportional to the poll percentages (largest-remainder,
+// summing to exactly n) and scattered across the crowd (a coprime stride) so no
+// option clusters in one seating block. Pure + deterministic (no RNG): the same
+// poll always renders the same crowd.
+export function ballotFromBars(bars, n) {
+  if (!Array.isArray(bars) || !bars.length || n <= 0) return [];
+  const raw = bars.map((b) => (b.percent / 100) * n);
+  const counts = raw.map((v) => Math.floor(v));
+  let used = counts.reduce((a, c) => a + c, 0);
+  const order = raw.map((v, k) => ({ k, frac: v - Math.floor(v) })).sort((a, b) => b.frac - a.frac);
+  for (let k = 0; used < n && order.length; k++) { counts[order[k % order.length].k] += 1; used += 1; }
+  const flat = [];
+  bars.forEach((b, oi) => { for (let c = 0; c < counts[oi]; c++) flat.push(b.index); });
+  const out = new Array(n);
+  const stride = coprimeStride(n);
+  for (let j = 0; j < n; j++) out[(j * stride) % n] = flat[j];
+  return out;
+}
+
+function coprimeStride(n) {
+  for (const s of [71, 67, 61, 53, 47, 41, 37, 31, 29, 23, 17, 13, 11, 7]) if (gcd(s, n) === 1) return s;
+  return 1;
+}
+function gcd(a, b) { return b ? gcd(b, a % b) : a; }

@@ -203,12 +203,15 @@ export const SCENES = {
     ],
   },
 
-  // Ask the audience — sweep the crowd, then the view from the stage.
+  // Ask the audience — the host's-eye view: from the stage, push in on the crowd
+  // as they raise their vote cards (studio.audienceVote drives the cards). Framed
+  // to see the audience fronts, not their backs. ~6s, then hands back to the run.
   audiencePoll: {
     set: 'studio',
     takes: [
-      { type: 'pan', dur: 3, p: [0, 3.1, 2.8], from: [-9, 2.4, -10], to: [9, 2.4, -10] },
-      { type: 'static', dur: 3, p: [0, 3.2, 3], t: [0, 3, -13] },
+      { type: 'dolly', dur: 6,
+        from: { p: [0, 3.7, 5.6], t: [0, 2.6, -13] },
+        to:   { p: [0, 3.1, 2.4], t: [0, 2.6, -13] } },
     ],
   },
 

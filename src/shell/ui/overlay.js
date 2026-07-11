@@ -9,6 +9,7 @@ import { h, clear } from './dom.js';
 import { letter } from '../../core/lifelines.js';
 import { DOMAIN_LABEL, TIER_LABEL } from './labels.js';
 import { readoutPacing } from '../hostLines.js';
+import { VOTE_COLORS } from '../../core/config.js';
 
 // The gold lock-in suspense before the reveal. Two 0.9s breaths on the early
 // tiers; the hard round and the final hold noticeably longer (with a drum
@@ -240,11 +241,15 @@ export class QuizScreen {
       // the live region.
       const summary = payload.bars.map((b) => `${letter(b.index)} ${b.percent}%`).join(', ');
       const rows = payload.bars.map((b, i) => {
+        const col = VOTE_COLORS[b.index] || VOTE_COLORS[0];
         const fill = h('span', { class: 'aud-bar' + (b.percent === max ? ' top' : ''), 'aria-hidden': 'true' });
         fill.style.transitionDelay = (i * 0.08) + 's';
+        fill.style.background = col; // same hue the crowd raised for this option
         const pct = h('span', { class: 'aud-pct' + (b.percent === max ? ' top' : ''), 'aria-hidden': 'true' }, '0%');
+        const letterEl = h('span', { class: 'aud-letter' }, letter(b.index));
+        letterEl.style.color = col;
         return { b, fill, pct, row: h('div', { class: 'aud-row' },
-          h('span', { class: 'aud-letter' }, letter(b.index)),
+          letterEl,
           h('span', { class: 'aud-bar-wrap' }, fill),
           pct) };
       });

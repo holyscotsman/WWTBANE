@@ -7,6 +7,21 @@ Items stay **code-complete, visual-pending** until signed off here.
 How to look: run `npm run serve` and open http://localhost:8080/ (or just open
 the live site). Prefer a real GPU browser for the WebGL.
 
+## Pending sign-off — lifeline & insider cinematics (newest)
+
+- [ ] **Ask the Audience vote** — fire it mid-question: the camera cuts to the
+  crowd from the stage, the audience raises colour-coded vote cards weighted to
+  the poll (most on the popular pick), and the DOM poll rows match those colours;
+  camera hands back after ~6s while the panel stays. Reduced motion: cards snap
+  on, no camera move.
+- [ ] **Call Shady Steve** — in the green room, pay Steve: the split-screen phone
+  cinematic plays (you left, Steve right — hat/shades/smirk), 5 bubbles in order
+  (he acknowledges → three clue bubbles → sign-off), Skip works, and the clue is
+  still in the panel afterward. Reduced motion shows the whole clue at once.
+- [ ] **Reset progress** — Settings → "Reset progress": confirm it wipes
+  everything and the next game opens with the first-run intro; applied settings
+  (motion/contrast/audio) reset too.
+
 ## Pending sign-off — hardening pass (newest; `docs/HARDENING_REVIEW.md`)
 
 - [ ] **Keyboard focus ring** — Tab to the answer options: each shows a clear

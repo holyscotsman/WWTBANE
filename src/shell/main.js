@@ -21,6 +21,7 @@ import { CssBackdrop } from './backdrop.js';
 import { Hud } from './ui/hud.js';
 import { QuizScreen } from './ui/overlay.js';
 import { Cinematic } from './ui/cinematic.js';
+import { playSteveCutscene } from './ui/steveCutscene.js';
 import { TitleScreen, GreenRoom, ResultScreen, HelpScreen, SettingsScreen } from './ui/screens.js';
 import { h, clear } from './ui/dom.js';
 
@@ -274,7 +275,16 @@ export class Game {
       settings: this.save.settings,
       audioStatus: this._audioStatus(),
       onChange: (k, v) => { this.save.settings[k] = v; this._applySettings(); this.persist(); this.showSettings(); },
-      onReset: () => { if (confirm('Reset ALL progress on this device? This cannot be undone.')) { this.save = persistence.resetAll(); this.campaign = null; this.showTitle(); } },
+      onReset: () => {
+        if (!confirm('Reset ALL progress? This wipes your mastery, coins, lifelines and history and starts you over as a first-time player (the intro plays again). This cannot be undone.')) return;
+        this.save = persistence.resetAll();
+        // clear every derived / in-memory bit so nothing survives the wipe
+        this.campaign = null; this.rc = null;
+        this.steveVisit = { called: false, question: null, clue: '' };
+        this._greenReveal = null; this._lastShownTier = null;
+        this._applySettings(); // re-apply the fresh default motion / contrast / audio
+        this.showTitle();
+      },
       onExport: () => persistence.exportString(this.save),
       onImport: (raw) => {
         const imported = persistence.importString(raw);
@@ -374,7 +384,10 @@ export class Game {
       this.save.steveTaught.push(this.steveVisit.question.id);
     }
     this.audio.play('lifeline');
-    this.persist(); this._renderGreenRoom();
+    this.persist();
+    this._renderGreenRoom(); // the clue now lives in the panel underneath…
+    // …and the split-screen cutscene plays over it, lifting to reveal it.
+    playSteveCutscene(this.roots.screen, { clue: this.steveVisit.clue, reduced: this.reduced });
   }
 
   /* ---------------- run lifecycle ---------------- */

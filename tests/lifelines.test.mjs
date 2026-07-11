@@ -1,11 +1,43 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fiftyFifty, askAudience, phoneFriend, PHONE_ACCURACY } from '../src/core/lifelines.js';
+import { fiftyFifty, askAudience, phoneFriend, PHONE_ACCURACY, ballotFromBars } from '../src/core/lifelines.js';
 import { makeRng } from '../src/core/rng.js';
 import { multiQuestion } from './fixtures.mjs';
 
 const single = { id: 'X-E-001', type: 'single', options: ['A', 'B', 'C', 'D'], answer: [2] };
 const twoDistract = { id: 'X-E-002', type: 'single', options: ['A', 'B', 'C'], answer: [0] }; // 2 distractors
+
+test('ballotFromBars distributes n crowd votes proportional to the poll', () => {
+  const bars = [{ index: 0, percent: 50 }, { index: 1, percent: 30 }, { index: 2, percent: 20 }];
+  const n = 168;
+  const ballot = ballotFromBars(bars, n);
+  assert.equal(ballot.length, n, 'one vote per crowd member');
+  assert.ok(ballot.every((v) => v != null), 'every seat gets a vote (no holes)');
+  const count = (opt) => ballot.filter((v) => v === opt).length;
+  // largest-remainder apportionment of 168: 84 / 50 / 34 (sums to 168)
+  assert.equal(count(0), 84);
+  assert.equal(count(1), 50);
+  assert.equal(count(2), 34);
+  assert.equal(count(0) + count(1) + count(2), n, 'votes sum to exactly n');
+  // NEGATIVE CONTROL: the popular option is not everyone — the poll still splits.
+  assert.ok(count(0) < n);
+});
+
+test('ballotFromBars is deterministic and scatters options across the crowd', () => {
+  const bars = [{ index: 0, percent: 60 }, { index: 1, percent: 40 }];
+  const a = ballotFromBars(bars, 100);
+  const b = ballotFromBars(bars, 100);
+  assert.deepEqual(a, b, 'same poll -> same crowd render');
+  // scattered, not one solid block: the first 60 seats are NOT all option 0.
+  const firstBlock = a.slice(0, 60);
+  assert.ok(firstBlock.some((v) => v === 1), 'options are interleaved, not clustered'); // NEGATIVE CONTROL
+});
+
+test('ballotFromBars guards empty / zero inputs', () => {
+  assert.deepEqual(ballotFromBars([], 10), []);         // NEGATIVE CONTROL
+  assert.deepEqual(ballotFromBars([{ index: 0, percent: 100 }], 0), []);
+  assert.deepEqual(ballotFromBars(null, 10), []);
+});
 
 test('50:50 never removes a correct option and always leaves a distractor', () => {
   for (let s = 0; s < 500; s++) {

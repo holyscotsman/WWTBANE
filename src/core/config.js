@@ -55,6 +55,12 @@ export const BANK_BOUNDARIES = [4, 9, 16, 24];
 
 export const LIFELINE_TYPES = ['fifty', 'audience', 'phone'];
 
+// Per-option colours for the Ask-the-Audience vote: the crowd raises cards in
+// these hues and the DOM poll rows carry the same swatch, so "the crowd leaned
+// toward B" reads the same in the studio and in the panel. Index = option index.
+// CSS strings so both the DOM and THREE.Color (which parses CSS) can use them.
+export const VOTE_COLORS = ['#1FDDE9', '#7855FA', '#92DD23', '#FF6B5B', '#FFC857', '#FF9F40'];
+
 export const LIFELINE_META = {
   fifty:    { name: '50:50',            glyph: '½', hint: 'Removes two wrong answers' },
   audience: { name: 'Ask the audience', glyph: '👥', hint: 'Polls the studio audience' },
