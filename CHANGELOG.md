@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased — graphics overhaul (phases 0 + 2): environment, reflective floor
+
+Adapted from the owner's 5-phase graphics directive (docs/GRAPHICS_OVERHAUL.md),
+kept modular + vendored per CLAUDE.md (no CDN, original art).
+
+- **Phase 0** — a dev-only FPS meter (`?fps=1` / Alt+F, off by default) for
+  verifying the perf budget on real hardware; a GL screenshot harness
+  (`tests/shots-gfx.mjs`) capturing the five gameplay states into `shots/`;
+  and `docs/GRAPHICS_AUDIT.md` grounding the directive in the real codebase.
+- **Phase 2** — a **PMREM environment map** built from a small procedural neon
+  scene (core Three.js — no addon, no CDN) so metals and gloss finally have
+  something to reflect; the **hero stage floor** is now low-roughness /
+  high-metalness and mirrors the rig; key emissives (rim, spokes, monitors,
+  halo) authored above 1 so bloom catches them deliberately. Env render target
+  is disposed on teardown.
+
 ## Unreleased — critical code review: fixes, hardening, tests
 
 Full-codebase review (core / shell / UI / tests) — findings and remediation in

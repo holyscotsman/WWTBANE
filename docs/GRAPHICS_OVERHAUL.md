@@ -1,0 +1,47 @@
+# WWTBANE Graphics Overhaul — adapted directive + ledger
+
+This is the owner's 5-phase graphics directive, **adapted to the current
+modular game** (the original was written for the retired single-file prototype).
+The full audit is in `docs/GRAPHICS_AUDIT.md`.
+
+## Adaptations (why this differs from the uploaded directive)
+
+- **Modular, not single-file.** `CLAUDE.md §5` mandates plain-JS modules; the
+  directive's own escape clause defers to it. Delivery stays modular.
+- **Three.js vendored, never CDN** (`CLAUDE.md §5`). Effects that would need
+  un-vendored addons (`Reflector`, `RoomEnvironment`, stock post shaders) are
+  built from **core Three.js** (`PMREMGenerator`, procedural env) and **inline
+  custom shaders** instead.
+- **Original art, no cloned trade dress** (`CLAUDE.md §6`). The stage medallion
+  is the show's own mark, **not** the Nutanix corporate logo.
+- **FPS not benchmarkable in CI.** A dev FPS meter (`?fps=1` / Alt+F) is provided
+  for the owner to verify the 60/≥45 budget on real hardware; perf principles
+  (one RAF, instancing, no per-frame alloc) are enforced and audited.
+- **Scope = the gaps.** Phases 3/4/5 are already substantially implemented; this
+  overhaul targets the audit's identified gaps, in the directive's phase order,
+  shipped as tested PRs.
+
+## Progress ledger
+
+- [x] Phase 0 — Audit, dev FPS meter, shots harness
+- [x] Phase 2 — Environment map + reflective hero floor + emissive tuning
+- [ ] Phase 3 — Shadows, rim/back light, lock-in cue
+- [ ] Phase 1 — Set detail (LED wall, columns, medallion, truss/fixtures, bevels)
+- [ ] Phase 4 — Post polish (vignette/grain) + camera micro-motion + toggle
+- [ ] Phase 5 — UI lozenges, dust motes, branded transitions
+- [ ] Final verification pass
+
+(Phase order is 0 → 2 → 3 → 1 → 4 → 5: materials/light first, since they make
+the geometry work in Phase 1 read; camera/UI polish last.)
+
+## Work log
+
+<!-- YYYY-MM-DD | Phase N | done|HANDOFF|BLOCKED | note -->
+- 2026-07-11 | Phase 0 | done | Audit grounded in real src; dev FPS meter
+  (`src/shell/fpsMeter.js`, `?fps=1`/Alt+F); shots harness `tests/shots-gfx.mjs`
+  writing before/after into `shots/`. Modular/vendored architecture confirmed.
+- 2026-07-11 | Phase 2 | done | PMREM environment from a procedural neon scene
+  (`_setupEnvironment`, core THREE — no addon/CDN) → `scene.environment` on both
+  sets; hero floor now low-roughness/high-metal (metal 0.9, rough 0.22,
+  envMapIntensity 1.5) reflecting the rig; emissive bumped >1 on rim/spokes/
+  monitors/halo to drive bloom. Tests green; dispose frees the env RT.
