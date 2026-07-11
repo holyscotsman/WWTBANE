@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased — title music toggle + dev add-coins
+
+- **Music toggle on the title screen** — a 🔊/🔇 button in the title footer mutes
+  or unmutes the music instantly (persists, and resumes the lounge when turned
+  back on). The full audio controls still live in Settings and the pause menu.
+- **Developer add-coins** — append `?dev=1` once to enable developer tools (a
+  persisted, dev-only flag). Settings then shows a Developer block with
+  +1,000 / +10,000 coins buttons (handy for testing the shop and Steve) and a
+  disable button. Never shown to normal players.
+
 ## Unreleased — lifeline & insider cinematics + reset progress
 
 - **Ask the Audience is a real vote now** — using it cuts to a host's-eye view of

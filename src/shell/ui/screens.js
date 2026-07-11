@@ -40,6 +40,10 @@ export function TitleScreen(ctx) {
     h('div', { class: 'title-foot' },
       h('button', { class: 'link', type: 'button', onclick: () => ctx.onHelp() }, 'How to play'),
       h('button', { class: 'link', type: 'button', onclick: () => ctx.onSettings() }, 'Settings'),
+      h('button', {
+        class: 'link', type: 'button', 'aria-pressed': String(!!ctx.music),
+        onclick: () => ctx.onToggleMusic && ctx.onToggleMusic(),
+      }, ctx.music ? '🔊 Music on' : '🔇 Music off'),
     ),
   );
 }
@@ -244,6 +248,15 @@ export function SettingsScreen(ctx) {
     h('div', { class: 'danger' },
       h('button', { class: 'ghost small', type: 'button', onclick: () => ctx.onReset() }, 'Reset progress'),
       h('span', { class: 'muted small' }, 'Start over as a first-time player: wipes mastery, coins, lifelines, and history, and the intro plays again on your next game.')),
+    ctx.dev
+      ? h('div', { class: 'dev-tools' },
+          h('b', {}, '🛠 Developer'),
+          h('span', { class: 'muted small' }, `Wallet: ${money(ctx.wallet)} coins`),
+          h('div', { class: 'dev-row' },
+            h('button', { class: 'secondary small', type: 'button', onclick: () => ctx.onDevAddCoins(1000) }, '+1,000 coins'),
+            h('button', { class: 'secondary small', type: 'button', onclick: () => ctx.onDevAddCoins(10000) }, '+10,000 coins')),
+          h('button', { class: 'ghost small', type: 'button', onclick: () => ctx.onDevDisable() }, 'Disable dev tools'))
+      : null,
     h('button', { class: 'primary', type: 'button', onclick: ctx.onClose }, 'Close'),
   );
 }
