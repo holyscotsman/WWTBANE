@@ -62,6 +62,7 @@ export class Studio {
     this.green = this._buildGreen();
     this.active = this.studio;
 
+    this._setupEnvironment(); // PMREM env so metals/gloss have something to reflect
     await this._setupBloom();
     window.addEventListener('resize', this._onResize);
     renderer.setAnimationLoop(this._tick);
@@ -81,6 +82,38 @@ export class Studio {
       this.useBloom = true;
     } catch {
       this.useBloom = false; // graceful: direct render still looks good
+    }
+  }
+
+  // Build a PMREM environment map from a small procedural "studio" scene of
+  // brand-coloured emitters, so metals and the gloss floor have something to
+  // reflect (core Three.js only — no RoomEnvironment addon, no CDN).
+  _setupEnvironment() {
+    try {
+      const pmrem = new THREE.PMREMGenerator(this.renderer);
+      const env = new THREE.Scene();
+      env.background = new THREE.Color(0x04040a);
+      const emit = (color, x, y, z, w, h) => {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color }));
+        m.position.set(x, y, z); m.lookAt(0, y, 0); env.add(m);
+      };
+      // a ring of neon emitters (the rig), a bright top, a dark floor
+      emit(0x9a7bff, 0, 7, -9, 20, 6);    // iris back wall
+      emit(0x1FDDE9, -9, 4, 3, 12, 8);    // aqua stage-left
+      emit(0x7855FA, 9, 4, 3, 12, 8);     // iris stage-right
+      emit(0xFFC857, 0, 3, 9, 14, 5);     // gold front (camera side)
+      emit(0x2a2f45, 0, 10.5, 0, 30, 30); // cool top fill
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshBasicMaterial({ color: 0x03030a }));
+      floor.rotation.x = -Math.PI / 2; floor.position.y = -1; env.add(floor);
+
+      this._envRT = pmrem.fromScene(env, 0.04);
+      const tex = this._envRT.texture;
+      this.studio.environment = tex;
+      this.green.environment = tex;
+      env.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+      pmrem.dispose();
+    } catch (e) {
+      console.warn('[wwtbane] environment map unavailable', e); // metals just read matte
     }
   }
 
@@ -156,6 +189,7 @@ export class Studio {
     if (this.renderer) {
       this.renderer.setAnimationLoop(null);
       if (this.composer && this.composer.dispose) this.composer.dispose();
+      if (this._envRT) this._envRT.dispose();
       this.renderer.dispose();
       [this.studio, this.green].forEach((sc) => sc && sc.traverse((o) => {
         if (o.geometry) o.geometry.dispose();
@@ -163,6 +197,7 @@ export class Studio {
           // material.dispose() does not free its textures — do it explicitly.
           if (m.map) m.map.dispose();
           if (m.emissiveMap) m.emissiveMap.dispose();
+          if (m.roughnessMap && m.roughnessMap !== m.map) m.roughnessMap.dispose();
           m.dispose();
         });
       }));
@@ -404,19 +439,24 @@ export class Studio {
     const warm = new THREE.PointLight(PAL.gold, 20, 30); warm.position.set(0, 4, 2); s.add(warm);
     this._pulseLight = new THREE.PointLight(PAL.mantis, 14, 40); this._pulseLight.position.set(0, 2, 3); s.add(this._pulseLight);
 
-    const discMat = mat(0x3a3f5c, 0x090914, 0.2, 0.5, 0.55); discMat.map = floorTexture();
+    // Hero floor: near-black, low-roughness, high-metalness so it mirrors the
+    // environment's neon (the signature glossy game-show floor). The floor
+    // texture drives a subtle roughness variation so it isn't a dead mirror.
+    const floorTex = floorTexture();
+    const discMat = mat(0x14172a, 0x05060f, 0.15, 0.22, 0.9);
+    discMat.map = floorTex; discMat.roughnessMap = floorTex; discMat.envMapIntensity = 1.5;
     const disc = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 0.4, 64), discMat); disc.position.y = -0.2; s.add(disc);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(9, 0.08, 12, 96), mat(0x000000, PAL.aqua, 1.7)); rim.rotation.x = Math.PI / 2; rim.position.y = 0.02; s.add(rim);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(9, 0.08, 12, 96), mat(0x000000, PAL.aqua, 2.2)); rim.rotation.x = Math.PI / 2; rim.position.y = 0.02; s.add(rim);
 
     const spokeGeo = new THREE.BoxGeometry(0.1, 0.05, 6);
-    const spokeMat = mat(0x000000, PAL.gold, 0.45);
+    const spokeMat = mat(0x000000, PAL.gold, 1.3);
     const N = 30, spokes = new THREE.InstancedMesh(spokeGeo, spokeMat, N), d = new THREE.Object3D();
     for (let i = 0; i < N; i++) { const a = i / N * Math.PI * 2; d.position.set(Math.cos(a) * 4.6, 0.03, Math.sin(a) * 4.6); d.rotation.set(0, -a, 0); d.updateMatrix(); spokes.setMatrixAt(i, d.matrix); }
     spokes.instanceMatrix.needsUpdate = true; s.add(spokes);
 
     // Shared glowing-screen texture for every monitor on the set.
     const screenTex = screenTexture();
-    const screenMat = () => { const m = mat(0x0a0a16, 0xffffff, 0.7, 0.5); m.emissiveMap = screenTex; m.map = screenTex; return m; };
+    const screenMat = () => { const m = mat(0x0a0a16, 0xffffff, 1.4, 0.5); m.emissiveMap = screenTex; m.map = screenTex; return m; };
     this._screenTex = screenTex;
 
     const console_ = new THREE.Group();
@@ -510,7 +550,7 @@ export class Studio {
 
     const back = new THREE.Mesh(new THREE.PlaneGeometry(12, 7), new THREE.MeshBasicMaterial({ map: wordmarkTexture(), transparent: true }));
     back.position.set(0, 4, -12); s.add(back);
-    const halo = new THREE.Mesh(new THREE.CircleGeometry(4.6, 64), mat(0x000000, PAL.iris, 0.4)); halo.position.set(0, 4, -12.2); s.add(halo);
+    const halo = new THREE.Mesh(new THREE.CircleGeometry(4.6, 64), mat(0x000000, PAL.iris, 1.2)); halo.position.set(0, 4, -12.2); s.add(halo);
 
     const beamColors = [PAL.iris, PAL.aqua, PAL.gold, PAL.iris];
     for (let i = 0; i < beamColors.length; i++) {

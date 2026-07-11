@@ -16,6 +16,7 @@ import { pickWelcome, pickQuestionLine } from './hostLines.js';
 import * as persistence from './persistence.js';
 import { GameAudio } from './audio.js';
 import { Music, MUSIC_STYLES } from './music.js';
+import { installFpsMeter } from './fpsMeter.js';
 import { CssBackdrop } from './backdrop.js';
 import { Hud } from './ui/hud.js';
 import { QuizScreen } from './ui/overlay.js';
@@ -60,6 +61,9 @@ export class Game {
   }
 
   async boot() {
+    // Dev-only FPS meter for the graphics performance budget (?fps=1 / Alt+F).
+    installFpsMeter();
+
     // Scene preview tool: ?scene=thinking&take=5 jumps the camera director
     // straight to a scene/take for review (docs/CINEMATIC_TAKES.md).
     const params = new URLSearchParams(window.location.search);
