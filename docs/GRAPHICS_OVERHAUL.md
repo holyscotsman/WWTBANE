@@ -29,7 +29,7 @@ The full audit is in `docs/GRAPHICS_AUDIT.md`.
 - [x] Phase 1 — Set detail (LED wall, columns, medallion, truss/fixtures, bevels)
 - [x] Phase 4 — Post polish (vignette/grain) + camera micro-motion + toggle
 - [x] Phase 5 — UI lozenges, dust motes, branded transitions
-- [ ] Final verification pass
+- [x] Final verification pass (structural — see below; on-hardware sign-off in `BROWSER_QA.md`)
 
 (Phase order is 0 → 2 → 3 → 1 → 4 → 5: materials/light first, since they make
 the geometry work in Phase 1 read; camera/UI polish last.)
@@ -69,3 +69,12 @@ the geometry work in Phase 1 read; camera/UI polish last.)
   gradient screen-wipe on top-level screen changes (menu↔game↔results), skipped
   under reduced motion / effects-off. Verified all answer states via the shots
   harness; 86/7/18 green.
+- 2026-07-11 | Final verify | done | Structural cross-check on merged main: full
+  matrix green (86 headless / 7 smoke / 18 e2e, no console errors); a dedicated
+  probe confirmed the effects-off + reduced-motion path (direct render, no
+  composer; motes + wipe suppressed) boots, plays, and reveals cleanly; a single
+  `tests/shots-gfx.mjs` frame shows all five phases coexisting (LED wall +
+  columns + floor medallion, reflective disc, soft shadows + rim, vignette/grain,
+  dust motes) with the hexagonal lozenges on top. The remaining gate is the
+  human on-hardware FPS + look sign-off, queued in `BROWSER_QA.md`
+  (`CLAUDE.md §6` — structural proof ≠ visual observation).

@@ -7,6 +7,35 @@ Items stay **code-complete, visual-pending** until signed off here.
 How to look: run `npm run serve` and open http://localhost:8080/ (or just open
 the live site). Prefer a real GPU browser for the WebGL.
 
+## Pending sign-off — graphics overhaul (newest; `docs/GRAPHICS_OVERHAUL.md`)
+
+Structural verification passed (tests green; effects-off + reduced-motion path
+boots/plays/reveals with no console errors; all five phases confirmed to coexist
+in a single frame via `tests/shots-gfx.mjs`). The remaining gate is human, on
+real hardware:
+
+- [ ] **FPS budget** — turn on the dev meter (`?fps=1` or Alt+F) and confirm the
+  studio holds ~60 (and ≥45 on weaker hardware) with effects on; note the drop
+  when the reflective floor / bloom / motes are on screen.
+- [ ] **Hero floor + environment** — the stage disc reflects the rig; emissive
+  props (rim, spokes, monitors, medallion) drive tasteful bloom, not blowout.
+- [ ] **Shadows + rim light** — figures cast soft shadows onto the disc; the cool
+  back/rim light separates the hot seats from the backdrop; the lock-in cue dims
+  the fills to a hard-key pool and crossfades back on the reveal.
+- [ ] **Set detail** — curved LED video wall, alternating iris/aqua light
+  columns, the floor medallion (the show's own mark), and the truss light cans
+  all read as real broadcast hardware; columns frame rather than wash.
+- [ ] **Post grade** — vignette darkens the corners, film grain is subtle, and
+  the camera micro-motion keeps settled shots from feeling frozen; the
+  "Cinematic effects" Settings toggle turns all of it (plus motes) off cleanly.
+- [ ] **Answer lozenges** — A/B/C/D read as the broadcast hexagonal lozenges in
+  every state (hover / selected / locked / correct / wrong / removed / phone
+  pick); the locked option's gold edge-glow traces the shape; high-contrast and
+  mobile (390px) still lay out cleanly.
+- [ ] **Dust motes + screen wipes** — faint motes drift in the beams during play
+  (gone under reduced motion / effects-off); the brand-gradient wipe sweeps on
+  menu ↔ game ↔ results changes without a hard cut.
+
 ## Pending sign-off — graphics + animation polish (newest)
 
 - [ ] **Procedural textures** — the stage disc reads as a machined platform
