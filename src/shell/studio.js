@@ -578,7 +578,51 @@ export class Studio {
     operator.position.set(3.9, 0, 10.4); operator.rotation.y = Math.PI + 0.35; // eyes on the monitor
     s.add(operator);
 
+    // ---- Phase 1 set detail: truss + fixtures, LED wall, columns, medallion ----
     const truss = new THREE.Mesh(new THREE.TorusGeometry(8, 0.18, 12, 64), mat(0x15151f, PAL.peach, 0.15, 0.4, 0.7)); truss.rotation.x = Math.PI / 2; truss.position.y = 6; s.add(truss);
+    // Instanced light fixtures (dark cans) hanging from the truss, with an
+    // emissive lens each — reads as a real rig. Both instanced (2 draw calls).
+    const NF = 14;
+    const canGeo = new THREE.CylinderGeometry(0.13, 0.18, 0.34, 12);
+    const cans = new THREE.InstancedMesh(canGeo, mat(0x0c0c14, 0x000000, 0, 0.6, 0.4), NF);
+    const lensGeo = new THREE.CircleGeometry(0.13, 14);
+    const lenses = new THREE.InstancedMesh(lensGeo, mat(0x000000, PAL.gold, 1.6), NF);
+    const fo = new THREE.Object3D();
+    for (let i = 0; i < NF; i++) {
+      const a = i / NF * Math.PI * 2;
+      fo.position.set(Math.cos(a) * 8, 5.75, Math.sin(a) * 8); fo.rotation.set(0.5, -a, 0);
+      fo.updateMatrix(); cans.setMatrixAt(i, fo.matrix);
+      fo.position.y = 5.55; fo.rotation.set(Math.PI / 2 + 0.5, -a, 0);
+      fo.updateMatrix(); lenses.setMatrixAt(i, fo.matrix);
+    }
+    cans.instanceMatrix.needsUpdate = true; lenses.instanceMatrix.needsUpdate = true; s.add(cans, lenses);
+
+    // Wraparound upper LED video wall (emissive, above the audience so it never
+    // clips them) — the big produced backdrop.
+    const ledWall = new THREE.Mesh(
+      new THREE.CylinderGeometry(16, 16, 4.6, 64, 1, true, Math.PI * 0.12, Math.PI * 1.76),
+      new THREE.MeshBasicMaterial({ map: ledWallTexture(), side: THREE.BackSide }));
+    ledWall.position.set(0, 7.6, 0); s.add(ledWall);
+    this._ledWall = ledWall;
+
+    // Perimeter light columns — vertical neon fins framing the stage, alternating
+    // iris/aqua (two instanced meshes so each keeps its emissive colour).
+    const colGeo = new THREE.BoxGeometry(0.13, 5.2, 0.42);
+    const makeCols = (color, offset) => {
+      const m = new THREE.InstancedMesh(colGeo, mat(0x0a0a16, color, 0.5, 0.5, 0.3), 9);
+      const o2 = new THREE.Object3D();
+      for (let i = 0; i < 9; i++) { const a = ((i * 2 + offset) / 18) * Math.PI * 2; o2.position.set(Math.cos(a) * 9.4, 2.6, Math.sin(a) * 9.4); o2.rotation.y = -a; o2.updateMatrix(); m.setMatrixAt(i, o2.matrix); }
+      m.instanceMatrix.needsUpdate = true; return m;
+    };
+    s.add(makeCols(PAL.iris, 0), makeCols(PAL.aqua, 1));
+
+    // Center stage medallion inlaid into the floor (original neon emblem).
+    const medallion = new THREE.Group();
+    const r1 = new THREE.Mesh(new THREE.TorusGeometry(1.55, 0.05, 10, 64), mat(0x000000, PAL.aqua, 1.7)); r1.rotation.x = Math.PI / 2; medallion.add(r1);
+    const r2 = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.035, 10, 64), mat(0x000000, PAL.iris, 1.5)); r2.rotation.x = Math.PI / 2; medallion.add(r2);
+    const emblem = new THREE.Mesh(new THREE.CircleGeometry(1.0, 48), new THREE.MeshBasicMaterial({ map: medallionTexture(), transparent: true }));
+    emblem.rotation.x = -Math.PI / 2; medallion.add(emblem);
+    medallion.position.set(0, 0.03, 0); s.add(medallion);
 
     const back = new THREE.Mesh(new THREE.PlaneGeometry(12, 7), new THREE.MeshBasicMaterial({ map: wordmarkTexture(), transparent: true }));
     back.position.set(0, 4, -12); s.add(back);
@@ -903,6 +947,47 @@ function artTexture() {
     x.fillStyle = cols[i % cols.length]; x.globalAlpha = 0.85; x.beginPath();
     x.arc(30 + (i * 53 % 210), 30 + (i * 37 % 130), 12 + (i * 7 % 26), 0, 7); x.fill();
   }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+// A wraparound LED video wall: a grid of glowing cells in brand colours on a
+// dark panel, deterministic so it's stable. Abstract neon (no trade dress).
+function ledWallTexture() {
+  const W = 1024, H = 256; const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  x.fillStyle = '#06060f'; x.fillRect(0, 0, W, H);
+  const cols = ['#7855FA', '#1FDDE9', '#92DD23', '#FFC857'];
+  const cw = 24, ch = 24, gap = 4;
+  for (let gy = 0; gy < H; gy += ch + gap) {
+    for (let gx = 0; gx < W; gx += cw + gap) {
+      const i = (gx / (cw + gap)) + (gy / (ch + gap)) * 3;
+      const lit = (i * 7 + Math.floor(i / 5)) % 4 === 0;
+      const col = cols[Math.floor(i) % cols.length];
+      x.globalAlpha = lit ? 0.9 : 0.16;
+      x.fillStyle = col;
+      x.fillRect(gx, gy, cw, ch);
+    }
+  }
+  x.globalAlpha = 1;
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 1); return t;
+}
+
+// The center stage medallion emblem — an original neon mark (nested hexagons +
+// radial ticks), drawn on transparent so only the glow inlays into the floor.
+function medallionTexture() {
+  const S = 256; const c = document.createElement('canvas'); c.width = c.height = S; const x = c.getContext('2d');
+  x.clearRect(0, 0, S, S);
+  const cx = S / 2, cy = S / 2;
+  const hex = (r, color, lw) => {
+    x.strokeStyle = color; x.lineWidth = lw; x.shadowColor = color; x.shadowBlur = 14;
+    x.beginPath();
+    for (let i = 0; i <= 6; i++) { const a = (i / 6) * Math.PI * 2 - Math.PI / 2; const px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r; i ? x.lineTo(px, py) : x.moveTo(px, py); }
+    x.stroke();
+  };
+  hex(96, '#1FDDE9', 5);
+  hex(62, '#7855FA', 4);
+  x.strokeStyle = '#FFC857'; x.lineWidth = 3; x.shadowColor = '#FFC857'; x.shadowBlur = 10;
+  for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; x.beginPath(); x.moveTo(cx + Math.cos(a) * 100, cy + Math.sin(a) * 100); x.lineTo(cx + Math.cos(a) * 116, cy + Math.sin(a) * 116); x.stroke(); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 

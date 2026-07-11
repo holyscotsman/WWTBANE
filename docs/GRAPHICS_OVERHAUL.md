@@ -26,7 +26,7 @@ The full audit is in `docs/GRAPHICS_AUDIT.md`.
 - [x] Phase 0 — Audit, dev FPS meter, shots harness
 - [x] Phase 2 — Environment map + reflective hero floor + emissive tuning
 - [x] Phase 3 — Shadows, rim/back light, lock-in cue
-- [ ] Phase 1 — Set detail (LED wall, columns, medallion, truss/fixtures, bevels)
+- [x] Phase 1 — Set detail (LED wall, columns, medallion, truss/fixtures, bevels)
 - [ ] Phase 4 — Post polish (vignette/grain) + camera micro-motion + toggle
 - [ ] Phase 5 — UI lozenges, dust motes, branded transitions
 - [ ] Final verification pass

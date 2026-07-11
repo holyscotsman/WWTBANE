@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased — graphics overhaul (phase 1): set detail
+
+- **Wraparound LED video wall** — a curved emissive panel arcing above the
+  audience shows a grid of glowing brand-colour cells (procedural, abstract —
+  no trade dress); the big produced backdrop.
+- **Center stage medallion** — an original neon emblem (nested hexagons +
+  radial ticks) inlaid into the stage floor.
+- **Perimeter light columns** — vertical neon fins framing the stage,
+  alternating iris/aqua (two instanced meshes), tuned below the bloom threshold
+  so they frame rather than wash.
+- **Rig fixtures** — instanced light cans hanging from the truss with emissive
+  lenses, so the overhead rig reads as real hardware. All repeats instanced.
+
 ## Unreleased — graphics overhaul (phase 3): shadows, rim light, lock-in cue
 
 - **Soft shadows** — the renderer now casts PCF soft shadows from one key
