@@ -49,9 +49,11 @@ audio-resume hardening, pause menu, mastery dashboard removed).
   reflective floor; P3 shadows + rim light + lock-in cue; P1 set detail (LED
   wall, columns, medallion, truss); P4 vignette/grain + camera micro-motion +
   effects toggle; P5 hexagonal answer lozenges + dust motes + branded screen
-  wipes. FPS budget + WebGL look need owner sign-off on real hardware
-  (dev meter: `?fps=1` / Alt+F); queued in `BROWSER_QA.md`. Final verification
-  pass (cross-check the whole overhaul on device) is the one remaining item.
+  wipes. Final verification pass done (structural): full matrix green, the
+  effects-off + reduced-motion render path verified clean, and all five phases
+  confirmed coexisting in one frame. The only open item is the human
+  on-hardware FPS + WebGL-look sign-off (dev meter `?fps=1` / Alt+F), queued in
+  `BROWSER_QA.md`. The overhaul is code-complete, visual-pending.
 
 ### Owner-authored bank (in progress)
 - Ingestion pipeline is live: `docs/QUESTION_AUTHORING.md` → Markdown →
