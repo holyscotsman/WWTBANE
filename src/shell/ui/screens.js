@@ -248,15 +248,32 @@ export function SettingsScreen(ctx) {
     h('div', { class: 'danger' },
       h('button', { class: 'ghost small', type: 'button', onclick: () => ctx.onReset() }, 'Reset progress'),
       h('span', { class: 'muted small' }, 'Start over as a first-time player: wipes mastery, coins, lifelines, and history, and the intro plays again on your next game.')),
-    ctx.dev
-      ? h('div', { class: 'dev-tools' },
-          h('b', {}, '🛠 Developer'),
-          h('span', { class: 'muted small' }, `Wallet: ${money(ctx.wallet)} coins`),
-          h('div', { class: 'dev-row' },
-            h('button', { class: 'secondary small', type: 'button', onclick: () => ctx.onDevAddCoins(1000) }, '+1,000 coins'),
-            h('button', { class: 'secondary small', type: 'button', onclick: () => ctx.onDevAddCoins(10000) }, '+10,000 coins')),
-          h('button', { class: 'ghost small', type: 'button', onclick: () => ctx.onDevDisable() }, 'Disable dev tools'))
-      : null,
+    h('label', { class: 'setting' },
+      h('input', { type: 'checkbox', checked: !!ctx.dev, onchange: (e) => ctx.onChange('dev', e.target.checked) }),
+      h('span', {}, h('b', {}, '🛠 Developer tools'), h('span', { class: 'muted small' }, 'Playtesting only: add coins and jump straight to any question (here, and from the pause menu mid-run).'))),
+    ctx.dev ? DevPanel(ctx) : null,
     h('button', { class: 'primary', type: 'button', onclick: ctx.onClose }, 'Close'),
   );
+}
+
+function DevPanel(ctx) {
+  const jumpInput = h('input', {
+    id: 'dev-start-input', class: 'dev-jump', type: 'number', min: '1', max: '30', value: '1',
+    'aria-label': 'Start run at question number',
+  });
+  const startAt = () => {
+    const n = parseInt(jumpInput.value, 10);
+    if (Number.isFinite(n)) ctx.onDevStartAt(n);
+  };
+  return h('div', { class: 'dev-tools' },
+    h('b', {}, '🛠 Developer'),
+    h('span', { class: 'muted small' }, `Wallet: ${money(ctx.wallet)} coins`),
+    h('div', { class: 'dev-row' },
+      h('button', { class: 'secondary small', type: 'button', onclick: () => ctx.onDevAddCoins(1000) }, '+1,000 coins'),
+      h('button', { class: 'secondary small', type: 'button', onclick: () => ctx.onDevAddCoins(10000) }, '+10,000 coins')),
+    h('div', { class: 'dev-row' },
+      h('label', { class: 'muted small', for: 'dev-start-input' }, 'Start run at question'),
+      jumpInput,
+      h('button', { class: 'secondary small', type: 'button', onclick: startAt }, 'Start here →')),
+    h('span', { class: 'muted small' }, 'Starts a fresh run and skips the intro. Earlier questions count as cleared for the coin math.'));
 }

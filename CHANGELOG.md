@@ -1,14 +1,18 @@
 # Changelog
 
-## Unreleased — title music toggle + dev add-coins
+## Unreleased — title music toggle + in-app dev menu
 
 - **Music toggle on the title screen** — a 🔊/🔇 button in the title footer mutes
   or unmutes the music instantly (persists, and resumes the lounge when turned
   back on). The full audio controls still live in Settings and the pause menu.
-- **Developer add-coins** — append `?dev=1` once to enable developer tools (a
-  persisted, dev-only flag). Settings then shows a Developer block with
-  +1,000 / +10,000 coins buttons (handy for testing the shop and Steve) and a
-  disable button. Never shown to normal players.
+- **In-app Developer menu** — enable it from Settings with a "🛠 Developer tools"
+  toggle (no URL needed; `?dev=1` still works as a shortcut). Once on, you get:
+  add coins (+1,000 / +10,000) in both Settings and the pause menu; a
+  "Start run at question N" control in Settings that skips the intro and drops you
+  onto that question; and a "Jump to question" control in the pause menu that moves
+  the current run to any question mid-play. Skipped-past questions count as cleared
+  so the banked/running coin math stays realistic. Purely a playtesting aid — the
+  authored key still decides correctness, and jumps never touch mastery.
 
 ## Unreleased — lifeline & insider cinematics + reset progress
 
