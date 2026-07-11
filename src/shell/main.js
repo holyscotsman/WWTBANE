@@ -72,6 +72,10 @@ export class Game {
     const params = new URLSearchParams(window.location.search);
     if (params.has('scene')) return this._previewMode(params);
 
+    // Dev tools: ?dev=1 turns on the developer options (persisted). They live in
+    // Settings and are never shown to normal players.
+    if (params.get('dev') === '1' && !this.save.settings.dev) { this.save.settings.dev = true; this.persist(); }
+
     // Validate the shipped bank; play with whatever is structurally valid.
     const res = validateBank(QUESTIONS);
     this.bank = res.valid;
@@ -263,10 +267,17 @@ export class Game {
     this._swap(TitleScreen({
       wallet: this.save.wallet,
       stats: this.save.stats,
+      music: this.save.settings.music !== false,
       onStart: (mode, seed) => this.startRun(mode, seed),
       onGreenRoom: () => this.showGreenRoom(),
       onHelp: () => this._swap(HelpScreen(() => this.showTitle())),
       onSettings: () => this.showSettings(),
+      onToggleMusic: () => {
+        this.save.settings.music = this.save.settings.music === false; // flip (default on)
+        this._applySettings(); // mutes, or resumes the lounge if turning on
+        this.persist();
+        this.showTitle(); // refresh the button label
+      },
     }));
   }
 
@@ -274,6 +285,10 @@ export class Game {
     this._swap(SettingsScreen({
       settings: this.save.settings,
       audioStatus: this._audioStatus(),
+      dev: !!this.save.settings.dev,
+      wallet: this.save.wallet,
+      onDevAddCoins: (n) => { this.save.wallet = Math.max(0, this.save.wallet + n); this.persist(); this.showSettings(); },
+      onDevDisable: () => { this.save.settings.dev = false; this.persist(); this.showSettings(); },
       onChange: (k, v) => { this.save.settings[k] = v; this._applySettings(); this.persist(); this.showSettings(); },
       onReset: () => {
         if (!confirm('Reset ALL progress? This wipes your mastery, coins, lifelines and history and starts you over as a first-time player (the intro plays again). This cannot be undone.')) return;
