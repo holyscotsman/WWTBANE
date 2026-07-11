@@ -41,8 +41,16 @@ audio-resume hardening, pause menu, mastery dashboard removed).
   green room (reveal + pep talk → shop, "Start next round"); win → prestige.
 
 ### Gates
-- Tests: 90 headless (negative controls) + 8 smoke + 18 e2e; CI runs headless
+- Tests: 97 headless (negative controls) + 8 smoke + 18 e2e; CI runs headless
   on every push/PR. All green as of the last drop.
+
+### Lifeline / insider cinematics (latest)
+- Ask the Audience now cuts to the crowd raising colour-coded vote cards
+  (`studio.audienceVote` + `ballotFromBars`; `VOTE_COLORS` shared with the DOM
+  poll). Shady Steve's tip plays a split-screen phone cutscene
+  (`src/shell/ui/steveCutscene.js`; clue split via `src/core/textSplit.js`).
+  Settings "Reset progress" hardened to a true first-time reset. Steve
+  opener/closer flavour flagged in `FLAGS.md §2`; visuals in `BROWSER_QA.md`.
 
 ### Hardening pass (docs/HARDENING_REVIEW.md)
 - Adversarial review (5 reviewers + per-finding verify) over the graphics

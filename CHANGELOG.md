@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased — lifeline & insider cinematics + reset progress
+
+- **Ask the Audience is a real vote now** — using it cuts to a host's-eye view of
+  the crowd, who raise glowing vote cards colour-coded per option and weighted to
+  the poll (most cards go to the popular pick; a trap can still swing it on hard).
+  The DOM poll rows carry the same colour so "the crowd leaned toward B" reads the
+  same on stage and in the panel. Deterministic apportionment (`ballotFromBars`);
+  reduced motion snaps the cards on.
+- **Call Shady Steve** — paying Steve for a tip now plays a split-screen phone
+  cinematic: you on one side, Steve (fedora, shades, smirk) on the other, his
+  speech bubbles arriving one at a time — he clocks that you want the good info,
+  gives the concept across three bubbles (the authored clue, split for pacing,
+  words unchanged), then signs off. Skippable; reduced motion shows the whole clue
+  at once; the clue also stays in the green-room panel for screen readers.
+- **Reset progress** — the Settings reset is clarified and hardened: it now
+  returns you to a genuine first-time state (mastery, coins, lifelines and history
+  wiped; the intro plays again) and re-applies the fresh default settings.
+
 ## Unreleased — hardening pass (adversarial review of the graphics + feedback work)
 
 An adversarial review (five reviewers + per-finding verification) over everything

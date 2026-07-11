@@ -20,10 +20,13 @@ ship, but each wants a human before it's "done" per `CLAUDE.md`.
 - **What:** the first-run cinematic (`src/shell/ui/cinematic.js`) contains host
   dialogue: the studio tour lines and the guided tutorial that walks the player
   through the UI and reveals the first question's answer. The welcome-back
-  lines (including the snarky set), per-question quips, and the new
+  lines (including the snarky set), per-question quips, and the
   safe-haven / tier-crossing congrats beats (`BANK_LINES`, `TIER_LINES`) in
-  `src/shell/hostLines.js` are the same category — game-mechanics banter,
-  AI-drafted at the owner's explicit request, awaiting a human read.
+  `src/shell/hostLines.js`, plus Steve's split-screen call bookends
+  (`STEVE_OPENER` / `STEVE_CLOSER` in `src/shell/ui/steveCutscene.js` — the
+  opener/sign-off only; the middle three bubbles are the authored `q.steveClue`
+  split for pacing, not new copy), are the same category — game-mechanics
+  banter, AI-drafted at the owner's explicit request, awaiting a human read.
 - **Why flagged:** `CLAUDE.md §7` reserves host dialogue for a human. These
   lines were AI-drafted at the owner's explicit request ("the host explains how
   to play") — they are game-mechanics narration, not exam teaching — but still

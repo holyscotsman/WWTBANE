@@ -242,8 +242,8 @@ export function SettingsScreen(ctx) {
       ioBox,
       h('div', { class: 'save-transfer-row' }, exportBtn, importBtn)),
     h('div', { class: 'danger' },
-      h('button', { class: 'ghost small', type: 'button', onclick: () => ctx.onReset() }, 'Reset all progress'),
-      h('span', { class: 'muted small' }, 'Wipes mastery, coins, and stats on this device.')),
+      h('button', { class: 'ghost small', type: 'button', onclick: () => ctx.onReset() }, 'Reset progress'),
+      h('span', { class: 'muted small' }, 'Start over as a first-time player: wipes mastery, coins, lifelines, and history, and the intro plays again on your next game.')),
     h('button', { class: 'primary', type: 'button', onclick: ctx.onClose }, 'Close'),
   );
 }

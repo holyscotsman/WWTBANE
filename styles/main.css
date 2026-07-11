@@ -442,6 +442,63 @@ li:nth-child(6) > .option { animation-delay: 0.42s; }
 .option.phone-pick { box-shadow: inset 0 0 0 1.4px var(--gold), inset 0 0 16px rgba(255,200,87,0.28); }
 .phone-tag { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 13px; }
 
+/* ===== Shady Steve split-screen call cinematic (green room) ===== */
+.steve-cine {
+  position: fixed; inset: 0; z-index: 45; display: flex; flex-direction: column;
+  background: radial-gradient(130% 100% at 50% 24%, rgba(12,10,24,0.94), rgba(3,3,8,0.99));
+  backdrop-filter: blur(5px); animation: fadeIn 0.3s ease both;
+}
+.sc-split { flex: 1; display: grid; grid-template-columns: 1fr 1fr; align-items: center; min-height: 0; }
+.sc-side {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 16px;
+  padding: 24px; opacity: 0.5; transition: opacity 0.35s var(--swift);
+}
+.sc-side.you { border-right: 1px solid rgba(255, 255, 255, 0.08); }
+.sc-side.talking { opacity: 1; }
+.sc-side.talking::before {
+  content: ''; position: absolute; left: 50%; top: 30%; width: 260px; height: 260px;
+  transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(120, 85, 250, 0.22), transparent 68%);
+}
+.sc-name { font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+
+.sc-portrait { position: relative; width: 150px; height: 150px; }
+.sc-portrait .sc-head { position: absolute; left: 50%; top: 52%; width: 96px; height: 96px; transform: translate(-50%, -50%); border-radius: 50%; box-shadow: inset -8px -10px 16px rgba(0,0,0,0.28); }
+.sc-portrait.you .sc-head { background: radial-gradient(circle at 40% 34%, #dcb78f, #b6875a); }
+.sc-portrait.steve .sc-head { background: radial-gradient(circle at 40% 34%, #b39676, #7a5d43); }
+.sc-hat { position: absolute; left: 50%; top: 8px; width: 128px; height: 30px; transform: translateX(-50%); background: #14141c; border-radius: 46% 46% 10px 10px / 80% 80% 10px 10px; box-shadow: 0 7px 0 -2px #0d0d14; }
+.sc-shades { position: absolute; left: 50%; top: 46%; width: 74px; height: 20px; transform: translate(-50%, -50%); background: #0a0a12; border-radius: 11px; box-shadow: 0 0 0 2px #05050a, 0 0 12px rgba(31, 221, 233, 0.3); }
+.sc-smirk { position: absolute; left: 55%; top: 70%; width: 26px; height: 10px; transform: translate(-50%, -50%) rotate(-9deg); border-bottom: 3px solid #5a3f2c; border-radius: 0 0 12px 4px; }
+.sc-collar { position: absolute; left: 50%; bottom: 2px; width: 116px; height: 42px; transform: translateX(-50%); background: linear-gradient(180deg, #242430, #14141c); border-radius: 44px 44px 0 0; z-index: -1; }
+.sc-portrait.you .sc-collar { background: linear-gradient(180deg, #2a3f22, #16210f); }
+.sc-eye { position: absolute; top: 46%; width: 8px; height: 8px; background: #1c1410; border-radius: 50%; }
+.sc-eye.l { left: 39%; } .sc-eye.r { left: 57%; }
+.sc-mouth { position: absolute; left: 50%; top: 68%; width: 22px; height: 8px; transform: translateX(-50%); border-bottom: 3px solid #7a4a34; border-radius: 0 0 12px 12px; }
+.sc-phone { position: absolute; right: 4px; bottom: 30px; font-size: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); animation: scPhone 1.5s ease-in-out infinite; }
+@keyframes scPhone { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(4deg); } }
+
+.sc-bubble {
+  position: relative; max-width: 340px; min-height: 56px; margin: 6px 0 0;
+  background: #f5f2e8; color: #1c1608; font-weight: 600; font-size: 14.5px; line-height: 1.42;
+  border-radius: 14px; padding: 12px 15px; box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5);
+}
+.sc-bubble::after { content: ''; position: absolute; left: 40px; top: -9px; border: 7px solid transparent; border-bottom: 11px solid #f5f2e8; border-top: 0; }
+.sc-bubble.pop { animation: phoneBubblePop 0.3s var(--swift) both; }
+.sc-skip {
+  position: absolute; right: 18px; bottom: 16px; z-index: 2;
+  background: rgba(255, 255, 255, 0.08); color: var(--text); border-radius: 10px;
+  padding: 8px 14px; font-weight: 700; font-size: 13px; box-shadow: inset 0 0 0 1px var(--line);
+}
+.sc-skip:hover { background: rgba(255, 255, 255, 0.14); }
+@media (max-width: 640px) {
+  .sc-portrait { width: 104px; height: 104px; }
+  .sc-portrait .sc-head { width: 68px; height: 68px; }
+  .sc-hat { width: 92px; height: 22px; }
+  .sc-shades { width: 54px; height: 15px; }
+  .sc-bubble { font-size: 13px; max-width: 90%; }
+  .sc-side { padding: 14px 10px; gap: 10px; }
+}
+
 /* feedback (between grade and next question) */
 .feedback { border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--line); background: var(--panel-2); margin-top: 16px; animation: pollIn 0.35s var(--swift) both; }
 .feedback.good { background: rgba(146, 221, 35, 0.08); border-color: rgba(146, 221, 35, 0.45); }

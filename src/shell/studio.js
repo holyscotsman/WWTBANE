@@ -8,6 +8,8 @@
 
 import * as THREE from 'three';
 import { Director } from './director.js';
+import { ballotFromBars } from '../core/lifelines.js';
+import { VOTE_COLORS } from '../core/config.js';
 
 const PAL = { iris: 0x7855FA, aqua: 0x1FDDE9, mantis: 0x92DD23, peach: 0xFF6B5B, gold: 0xFFC857 };
 
@@ -159,6 +161,26 @@ export class Studio {
     if (P) this.director.holdPose(P.p, P.t);
   }
 
+  // The crowd casts its vote: tint each card by the option that seat voted for
+  // (proportional to the poll — VOTE_COLORS), then the _tick beat raises + fades
+  // them in. Presentation only; the authored key still decides correctness.
+  audienceVote(bars) {
+    const cards = this._voteCards;
+    if (!cards || !Array.isArray(bars) || !bars.length) return;
+    const ballot = ballotFromBars(bars, this._voteN);
+    const col = this._voteCol || (this._voteCol = new THREE.Color());
+    for (let i = 0; i < this._voteN; i++) {
+      const opt = ballot[i];
+      col.set(VOTE_COLORS[opt] != null ? VOTE_COLORS[opt] : VOTE_COLORS[0]);
+      cards.setColorAt(i, col);
+    }
+    if (cards.instanceColor) cards.instanceColor.needsUpdate = true;
+    cards.visible = true;
+    cards.position.y = -0.18;
+    cards.material.opacity = 0;
+    this._vote = { t: 0 }; // drives rise → hold → fall in _tick
+  }
+
   // React to a quiz event: the director cues the camera (scene playlists in
   // takes.js); this switch keeps the lighting side — mood, pulses, beam spin.
   react(type, data = {}) {
@@ -176,6 +198,11 @@ export class Studio {
       case 'ui:lockin':
         this._lightEnv = 0.32; // dim the fills — hard key on the contestant
         this._phase = 'lockin';
+        break;
+      case 'lifeline:use':
+        // Ask the Audience: the crowd raises its vote cards (the director cuts to
+        // the audiencePoll camera in the same tick).
+        if (data.type === 'audience' && data.payload) this.audienceVote(data.payload.bars);
         break;
       case 'host:welcome':
         this._talk = 3.6;
@@ -323,6 +350,28 @@ export class Studio {
       if (this._key2) this._key2.intensity = B.key2 * e;
       if (this._warm) this._warm.intensity = B.warm * e;
       if (this._rimLight) this._rimLight.intensity = B.rim * (0.5 + 0.5 * e);
+    }
+
+    // Ask-the-Audience vote cards: raise + fade in, hold, then lower + fade out.
+    // Event-driven (handled regardless of reduced motion; reduced snaps on/off).
+    if (this._vote && this._voteCards) {
+      const v = this._vote; v.t += dt;
+      const cards = this._voteCards;
+      const RISE = 1.1, HOLD_END = 4.6, FALL_END = 5.6;
+      if (this.reduced) {
+        cards.position.y = 0; cards.material.opacity = 0.92;
+        if (v.t >= FALL_END) { cards.visible = false; this._vote = null; }
+      } else if (v.t < RISE) {
+        const k = 1 - Math.pow(1 - v.t / RISE, 3);
+        cards.position.y = -0.18 * (1 - k); cards.material.opacity = 0.92 * k;
+      } else if (v.t < HOLD_END) {
+        cards.position.y = Math.sin((v.t - RISE) * 2) * 0.012; cards.material.opacity = 0.92;
+      } else if (v.t < FALL_END) {
+        const k = (v.t - HOLD_END) / (FALL_END - HOLD_END);
+        cards.position.y = -0.16 * k; cards.material.opacity = 0.92 * (1 - k);
+      } else {
+        cards.visible = false; cards.material.opacity = 0; this._vote = null;
+      }
     }
 
     // Life pass: blinking, breathing, head sway, talking mouths, reactions.
@@ -671,6 +720,32 @@ export class Studio {
       if (m.instanceColor) m.instanceColor.needsUpdate = true;
       s.add(m);
     }
+
+    // Ask-the-Audience vote cards — one small glowing card held in front of each
+    // member (hidden until the lifeline fires). audienceVote() tints them by the
+    // poll (VOTE_COLORS) and the _tick beat raises + fades them in. One instanced
+    // mesh: additive-free MeshBasic so each card glows its own colour unlit.
+    const cardGeo = new THREE.PlaneGeometry(0.16, 0.22);
+    const cardMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false });
+    const voteCards = new THREE.InstancedMesh(cardGeo, cardMat, total);
+    const cardO = new THREE.Object3D();
+    const white = new THREE.Color(0xffffff);
+    for (let i = 0; i < seats.length; i++) {
+      const st = seats[i];
+      const dl = Math.hypot(st.x, st.z) || 1; const ux = -st.x / dl, uz = -st.z / dl; // toward stage centre
+      cardO.position.set(st.x + ux * 0.28, st.y + 1.34 * st.scale, st.z + uz * 0.28);
+      cardO.rotation.set(0, Math.atan2(ux, uz), 0); // face the stage (and the vote camera)
+      cardO.scale.setScalar(st.scale);
+      cardO.updateMatrix(); voteCards.setMatrixAt(i, cardO.matrix);
+      voteCards.setColorAt(i, white);
+    }
+    voteCards.instanceMatrix.needsUpdate = true;
+    if (voteCards.instanceColor) voteCards.instanceColor.needsUpdate = true;
+    voteCards.visible = false;
+    s.add(voteCards);
+    this._voteCards = voteCards;
+    this._voteN = seats.length;
+    this._vote = null;
 
     // One reusable "crowd actor" who stands in for a seat during the random
     // audience moments (waving, getting up and leaving). Hidden until then; its
