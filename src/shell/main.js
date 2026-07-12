@@ -679,6 +679,7 @@ export class Game {
   answer(indices) {
     if (!this.rc) return;
     const result = this.rc.answer(indices);
+    if (!result) return; // dead run / double submit — core refused the grade
     this.hud.update(this.rc.snapshot());
     this.quiz.showFeedback(result);
     // Mastery + lifeline charges changed this turn.
