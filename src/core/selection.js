@@ -153,7 +153,11 @@ function pickFinal({ bank, buckets, reachedFinalBefore, ctx }) {
 // Steve's clue can reference a real, guaranteed-upcoming question. The set two
 // ahead is built after the current set is played, from the latest mastery.
 export class SetManager {
-  constructor({ bank, getMastery, mode = 'mastery', seed = 'default', reachedFinalBefore = true, rng }) {
+  // getRunIndex: the staleness clock for mastery weighting. It must be the SAME
+  // counter that stamps record().lastRun (the shell passes save.stats.runs) or
+  // "less recently seen" silently dies after any campaign rebuild — the private
+  // setIndex resets to 0 on every prestige/import while lastRun keeps counting.
+  constructor({ bank, getMastery, mode = 'mastery', seed = 'default', reachedFinalBefore = true, rng, getRunIndex }) {
     this.bank = bank;
     this.getMastery = getMastery || (() => ({ records: {} }));
     this.mode = mode;
@@ -161,6 +165,7 @@ export class SetManager {
     this.reachedFinalBefore = reachedFinalBefore;
     this.rng = rng;
     this.setIndex = 0;
+    this.getRunIndex = getRunIndex || (() => this.setIndex);
     this._current = null;
     this._next = null;
   }
@@ -179,7 +184,7 @@ export class SetManager {
       seed: this.seed,
       setIndex,
       reachedFinalBefore: this.reachedFinalBefore,
-      currentRun: setIndex,
+      currentRun: this.getRunIndex(),
       exclude,
       rng: this.rng,
     });

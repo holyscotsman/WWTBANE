@@ -109,6 +109,31 @@ test('mastery mode surfaces priority questions first; seeded mode ignores priori
   assert.ok(mMean > sMean + 0.6, `mastery (${mMean.toFixed(2)}) must beat priority-blind seeded (${sMean.toFixed(2)})`);
 });
 
+test('SetManager feeds the shared run clock into mastery weighting (staleness survives rebuilds)', () => {
+  const bank = makeBank({ easy: 15, medium: 15, hard: 15, extreme: 5, impossible: 2 });
+  // Spread lastRun 0..14 across every item so the clock value changes weights.
+  const mkMastery = () => {
+    const m = emptyMastery();
+    bank.filter((q) => q.authoredDifficulty !== 'extreme').forEach((q, i) => {
+      record(m, q.id, { correct: true, runIndex: i % 15, authoredDifficulty: q.authoredDifficulty });
+    });
+    return m;
+  };
+  const mkRng = () => { let c = 0; return () => { c++; return ((c * 2654435761) % 1000) / 1000; }; };
+  const ids = (set) => set.map((q) => q.id);
+
+  // Plumbing proof: a SetManager with clock=10 builds the EXACT set that a
+  // direct buildSet with currentRun=10 builds (same rng, same mastery).
+  const direct10 = buildSet({ bank, mastery: mkMastery(), mode: 'mastery', currentRun: 10, rng: mkRng(), reachedFinalBefore: true });
+  const sm10 = new SetManager({ bank, getMastery: mkMastery, mode: 'mastery', rng: mkRng(), reachedFinalBefore: true, getRunIndex: () => 10 });
+  assert.deepEqual(ids(sm10.init()), ids(direct10), 'getRunIndex reaches buildSet as currentRun');
+
+  // NEGATIVE CONTROL: the old post-prestige state (clock reset to 0) selects a
+  // DIFFERENT set — staleness clamps to zero and the weighting changes.
+  const sm0 = new SetManager({ bank, getMastery: mkMastery, mode: 'mastery', rng: mkRng(), reachedFinalBefore: true, getRunIndex: () => 0 });
+  assert.notDeepEqual(ids(sm0.init()), ids(direct10), 'a collapsed clock changes selection');
+});
+
 test('SetManager keeps a disjoint current/next and Steve reads the upcoming run', () => {
   // Big enough to build two fully-disjoint back-to-back runs (needs >= 60).
   const bank = makeBank({ easy: 25, medium: 25, hard: 25, extreme: 8, impossible: 2 });

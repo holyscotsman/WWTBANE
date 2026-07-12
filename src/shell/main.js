@@ -414,6 +414,9 @@ export class Game {
       getMastery: () => this.save.mastery,
       mode: 'mastery',
       reachedFinalBefore: true, // finals handled by the impossible-swap below
+      // Staleness clock = the same counter record() stamps into lastRun, so
+      // "less recently seen" survives prestige/import campaign rebuilds.
+      getRunIndex: () => this.save.stats.runs,
     });
     this.campaign.init();
   }
