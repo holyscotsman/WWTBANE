@@ -744,6 +744,7 @@ export class Game {
       impossibleFinal: !!(result && result.wasFinal && result.wasImpossible),
       correctText: result ? this._answerText(result.q, result.correctAnswer) : null,
       explanation: result ? result.explanation : null,
+      pickedNote: result ? this._pickedNote(result) : null,
       reached: reached + 1, // the question that ended the run
       banked: pay || 0,
     };
@@ -763,6 +764,17 @@ export class Game {
   _answerText(q, indices) {
     if (!q) return '';
     return indices.map((i) => `${letter(i)}: ${q.options[i]}`).join('  ·  ');
+  }
+
+  // The source exam's note for the (wrong) option the player picked — shown in
+  // the green-room reveal so the miss teaches. Authored content, never generated.
+  _pickedNote(result) {
+    const q = result.q;
+    if (!q || !Array.isArray(q.optionNotes) || !Array.isArray(result.selected)) return null;
+    const wrongPicks = result.selected.filter((i) => !result.correctAnswer.includes(i));
+    const notes = wrongPicks.map((i) => q.optionNotes[i]).filter(Boolean)
+      .map((n, k) => (wrongPicks.length > 1 ? `${letter(wrongPicks[k])}: ${n}` : n));
+    return notes.length ? notes.join('  ·  ') : null;
   }
 
   persist() { persistence.save(this.save); }

@@ -509,6 +509,11 @@ li:nth-child(6) > .option { animation-delay: 0.42s; }
 .fb-bank { color: var(--mantis); font-weight: 700; }
 .fb-exp { line-height: 1.5; font-size: 13.5px; }
 .fb-ref { color: var(--muted); font-size: 12px; }
+.fb-notes { font-size: 12.5px; color: var(--muted); }
+.fb-notes summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+.fb-notes summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 4px; }
+.fb-notes ul { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; line-height: 1.45; }
+.fb-notes b { color: var(--ink); }
 .continue-btn { align-self: flex-start; margin-top: 4px; background: linear-gradient(100deg, var(--iris), var(--aqua)); color: #05121a; font-weight: 800; font-size: 14.5px; border-radius: 12px; padding: 12px 24px; box-shadow: 0 6px 22px rgba(31, 221, 233, 0.3); transition: transform 0.15s, box-shadow 0.2s; }
 .continue-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(31, 221, 233, 0.45); }
 
@@ -533,7 +538,8 @@ li:nth-child(6) > .option { animation-delay: 0.42s; }
 .seed-box p { margin: 10px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
 .seed-controls { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .seed-input { flex: 1 1 160px; background: #0a0a16; border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 10px 12px; font-family: var(--mono); font-size: 13px; letter-spacing: 0.1em; }
-.title-foot { display: flex; gap: 18px; margin-top: 22px; justify-content: center; animation: riseIn 0.5s var(--swift) 0.34s both; }
+.title-foot { display: flex; gap: 18px; margin-top: 22px; justify-content: center; align-items: center; animation: riseIn 0.5s var(--swift) 0.34s both; }
+.title-foot .version { font: 600 11px var(--mono); color: var(--dim); letter-spacing: 0.06em; }
 
 /* ============================== green room ============================== */
 /* Sits low on screen (owner request) so the 3D lounge stays visible above. */
@@ -581,6 +587,8 @@ li:nth-child(6) > .option { animation-delay: 0.42s; }
 .reveal-label { text-transform: uppercase; letter-spacing: 0.16em; font-size: 11px; font-weight: 700; color: var(--muted); }
 .reveal-answer { font-weight: 800; font-size: 17px; color: var(--mantis); margin-top: 7px; }
 .reveal-exp { margin: 7px 0 0; font-size: 13px; line-height: 1.55; color: var(--muted); }
+.reveal-picked { margin: 7px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--peach); }
+.reveal-picked b { color: var(--ink); }
 .result-screen .wallet-row { margin-top: 24px; animation-delay: 0.42s; }
 .result-screen .menu { margin-top: 22px; animation: riseIn 0.5s var(--swift) 0.48s both; }
 .result-screen.win .primary.big { background: linear-gradient(100deg, var(--gold), var(--peach)); box-shadow: 0 8px 28px rgba(255, 200, 87, 0.4); font-size: 15px; padding: 14px 28px; }

@@ -5,7 +5,11 @@
 import { DOMAINS, DIFFICULTIES } from './config.js';
 
 export const REVIEW_STATUSES = ['ai-drafted', 'verified', 'human-reviewed', 'quarantine'];
-const ID_RE = /^[A-Z]+-[EMHX]-\d{3}$/; // e.g. STOR-E-001, DP-H-014, PRISM-X-002
+// Two accepted id shapes:
+//  - native:      STOR-E-001, DP-H-014, PRISM-X-002
+//  - interchange: ncp-mci-e1-q7 — the cross-game (StarNix/WWTBANE) bank format.
+//    Kept verbatim so mastery records stay stable across re-imports and games.
+const ID_RE = /^(?:[A-Z]+-[EMHX]-\d{3}|[a-z0-9]+(?:-[a-z0-9]+)*-q\d+)$/;
 
 // Validate a single question object. Returns { ok, errors: string[] }.
 export function validateQuestion(q, seenIds) {
@@ -68,6 +72,17 @@ export function validateQuestion(q, seenIds) {
       else if (/^[a-z][a-z0-9+.-]*:|^\/\//i.test(q.image.src.trim())) push('image.src must be a local path, not an external URL');
       if (typeof q.image.alt !== 'string' || q.image.alt.trim().length < 3) push('image.alt (description) is required');
       if (typeof q.image.caption !== 'undefined' && typeof q.image.caption !== 'string') push('image.caption must be a string');
+    }
+  }
+
+  // Optional per-option explanations (interchange banks carry a note per option:
+  // why the right one is right and each distractor wrong). When present the array
+  // must align 1:1 with options; entries may be '' where the source had no note.
+  if (typeof q.optionNotes !== 'undefined') {
+    if (!Array.isArray(q.optionNotes)) push('optionNotes must be an array');
+    else {
+      if (Array.isArray(q.options) && q.optionNotes.length !== q.options.length) push('optionNotes must align 1:1 with options');
+      if (q.optionNotes.some((n) => typeof n !== 'string')) push('optionNotes entries must be strings');
     }
   }
 

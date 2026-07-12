@@ -3,7 +3,7 @@
 // gold-tinted green room, gold-takeover win / subdued loss results.
 
 import { h, money } from './dom.js';
-import { LIFELINE_TYPES, LIFELINE_META, LIFELINE_MAX_SLOTS, SHOP } from '../../core/config.js';
+import { LIFELINE_TYPES, LIFELINE_META, LIFELINE_MAX_SLOTS, SHOP, VERSION } from '../../core/config.js';
 import { letter } from '../../core/lifelines.js';
 import { MUSIC_STYLES } from '../music.js';
 
@@ -44,6 +44,7 @@ export function TitleScreen(ctx) {
         class: 'link', type: 'button', 'aria-pressed': String(!!ctx.music),
         onclick: () => ctx.onToggleMusic && ctx.onToggleMusic(),
       }, ctx.music ? '🔊 Music on' : '🔇 Music off'),
+      h('span', { class: 'version' }, `v${VERSION}`),
     ),
   );
 }
@@ -62,6 +63,7 @@ export function GreenRoom(ctx) {
         h('div', { class: 'reveal-label' }, 'The correct answer was'),
         h('div', { class: 'reveal-answer' }, r.correctText || '—'),
         r.explanation ? h('p', { class: 'reveal-exp' }, r.explanation) : null,
+        r.pickedNote ? h('p', { class: 'reveal-picked' }, h('b', {}, 'Your pick: '), r.pickedNote) : null,
       ),
       h('div', { class: 'wallet-row' }, h('span', { class: 'wallet' }, `🛡 ${money(r.banked)} coins banked this run`)),
       h('p', { class: 'muted', style: { textAlign: 'center', maxWidth: '52ch', margin: '0 auto' } },

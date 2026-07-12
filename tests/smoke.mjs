@@ -31,6 +31,9 @@ async function main() {
     await page.waitForSelector('.brand-main', { timeout: 10000 });
     check('title screen renders', true);
 
+    const ver = await page.textContent('.title-foot .version').catch(() => null);
+    check('version badge shows on the title screen', /^v\d+\.\d+\.\d+$/.test(ver || ''), String(ver));
+
     await page.click('button.primary.big');
     await page.waitForSelector('.q-card .stem', { timeout: 10000 });
     check('a question is shown', true, await page.textContent('.chip'));

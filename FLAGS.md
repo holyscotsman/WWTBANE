@@ -3,6 +3,26 @@
 Things the autonomous loop **cannot** decide. Nothing here blocks a playable
 ship, but each wants a human before it's "done" per `CLAUDE.md`.
 
+## 0. Exam2 interchange bank — 9 quarantined questions need owner decisions
+- **Imported:** 51 questions from `docs/interchange/e1.md` (owner-supplied,
+  transcribed verbatim from the source exam) are live in the bank, with 6
+  exhibit images. Keys are the exam's own — no decision needed there.
+- **Waiting on the owner** (`docs/interchange/e1-review.md`; the parser refuses
+  these until the flags are removed):
+  - **8 choose-two questions** (q13, q17, q27, q48, q50, q54, q57, q60): the
+    review file was written for a single-answer schema, but **WWTBANE supports
+    multi-answer natively** (all-or-nothing grading). Say the word and they
+    import as `type: multi` unchanged. q48 is also flagged malformed in the
+    source (bundles two independent facts); recommend splitting — a content
+    decision only you can make.
+  - **q51 — contradictory source key**: three of four signals (the per-option
+    explanations and the overall explanation) indicate the intended answer is
+    "Migrate vDisks…", but the exam's key marks "Migrate VM…". NOT flipped
+    automatically — rule on it and it moves to the live bank.
+- Also for a human pass: the interchange `@domain`/`@difficulty` tags were
+  authored during transcription (not exam content); the domain map
+  (architecture→foundation, vms→ahv) is an ingestion choice — flag if wrong.
+
 ## 1. Question bank — owner content arriving; 25 priority questions merged
 - **Status:** the owner has supplied **25 of their own questions** (a Nutanix
   practice-exam set). These are merged into the bank as the **priority** set

@@ -7,6 +7,28 @@ Items stay **code-complete, visual-pending** until signed off here.
 How to look: run `npm run serve` and open http://localhost:8080/ (or just open
 the live site). Prefer a real GPU browser for the WebGL.
 
+## Pending sign-off — v0.1.1 kickoff (newest)
+
+- [ ] **Music on first click** — load the title fresh (hard refresh), click once
+  anywhere: the show theme should start within a second, no off/on toggle
+  needed. Also background the tab a minute, return, click: it resumes.
+- [ ] **Upbeat title theme** — the menu/green-room track is now an up-tempo
+  show opener (bright progression, driving bass, the question hook on top).
+  Confirm it reads as game-show excitement, not elevator jazz — and that the
+  four music styles (studio/neon/mellow/arcade) still sound right on it.
+- [ ] **Audience faces the stage** — `?scene=thinking&take=3` and
+  `?scene=audiencePoll`: every seated person (and chair) faces stage centre —
+  faces/laps toward the stage, hair at the back; wave/cough/leave crowd
+  moments still swap in facing the right way.
+- [ ] **Exhibit questions** — play until an interchange question with an image
+  appears (dev-jump: seed NTNX-TEST2 → Q25): the exhibit renders between stem
+  and options, readable, with a caption-less clean frame; alt text present.
+- [ ] **"Why the other options are wrong"** — answer an interchange question
+  correctly: the collapsed panel under the explanation opens to per-option
+  notes. Get one wrong: the green-room reveal shows "Your pick:" with the note
+  for the option you chose.
+- [ ] **Version badge** — v0.1.1 shows in the title footer, legible, unobtrusive.
+
 ## Pending sign-off — lifeline & insider cinematics (newest)
 
 - [ ] **Ask the Audience vote** — fire it mid-question: the camera cuts to the

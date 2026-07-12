@@ -6,6 +6,1532 @@
 
 export const QUESTIONS = [
   {
+    "id": "ncp-mci-e1-q1",
+    "domain": "security",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator sees the alert shown in the exhibit. What should the administrator do to make sure the Nutanix user can no longer SSH to a CVM using a password?",
+    "options": [
+      "Rename the nutanix user.",
+      "Block port 22 on the CVM firewall.",
+      "Enable Cluster Lockdown.",
+      "Delete the nutanix user."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Enabling Cluster Lockdown ensures the nutanix user cannot SSH using a password.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, renaming does not prevent SSH access.",
+      "Incorrect, blocks all SSH access but affects all users.",
+      "Correct: prevents SSH access for the nutanix user using password.",
+      "Incorrect: Not recommended; can cause system issues."
+    ],
+    "tags": [
+      "cluster-lockdown",
+      "ssh",
+      "cvm",
+      "alerts"
+    ],
+    "image": {
+      "src": "src/content/images/ncp-mci-e1-q1.png",
+      "alt": "Prism alert detail: 'The cluster is using password based ssh access for the cvm 192.168.10.102.' Severity Info, impact type Configuration. Summary states password-based remote login is enabled and recommends key-based SSH instead. Recommendation: change the SSH security setting of the CVM."
+    }
+  },
+  {
+    "id": "ncp-mci-e1-q2",
+    "domain": "foundation",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "How many copies of the metadata are maintained within a Redundancy Factor 3 Nutanix cluster?",
+    "options": [
+      "2",
+      "3",
+      "5",
+      "7"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "A Redundancy Factor 3 (RF3) cluster maintains five copies of the metadata. This ensures availability and consistency even if two nodes fail. While the data itself has three copies in RF3, the metadata has five to guarantee quorum and prevent split-brain scenarios.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, even insufficient for RF2 clusters.",
+      "Incorrect, as RF3 requires more metadata copies, but 3 is number of copies for RF2.",
+      "Correct: as RF3 maintains five metadata copies.",
+      "Incorrect: not the default metadata copy count for RF3."
+    ],
+    "tags": [
+      "redundancy-factor",
+      "rf3",
+      "metadata",
+      "quorum"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q3",
+    "domain": "lifecycle",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "Which update in LCM can an administrator apply on a per-node basis?",
+    "options": [
+      "AOS",
+      "BMC",
+      "NCC",
+      "AHV"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Nutanix LCM allows firmware updates to be applied on a per-node basis. While software updates generally apply to the whole cluster, firmware updates like BIOS or BMC can be applied to individual nodes.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: AOS upgrades affect the entire cluster and require cluster-wide consistency.",
+      "Correct: BMC firmware controls remote management and power cycling of individual nodes. Updating BMC does not impact the entire cluster and can be done per node.",
+      "Incorrect: NCC updates apply across all nodes simultaneously, ensuring uniformity in checks.",
+      "Incorrect: AHV updates require coordinated upgrades across hosts to maintain VM availability."
+    ],
+    "tags": [
+      "lcm",
+      "firmware",
+      "bmc",
+      "upgrades"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q4",
+    "domain": "security",
+    "authoredDifficulty": "easy",
+    "type": "single",
+    "stem": "What is the default admin session log out time?",
+    "options": [
+      "5 minutes",
+      "10 minutes",
+      "15 minutes",
+      "20 minutes"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The default admin session timeout in Prism is 15 minutes. While the session timeout setting in the UI can be adjusted to longer durations, the IAM token and session cookie still expire after 15 minutes. The UI setting controls how long the UI attempts to keep the session alive by making API calls.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, Too short for default setting",
+      "Incorrect, default setting is 15 min",
+      "Correct: default session timeout",
+      "Incorrect: Not the default setting"
+    ],
+    "tags": [
+      "prism",
+      "session-timeout",
+      "iam"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q5",
+    "domain": "networking",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "When configuring a physical network switch in Prism Element, what information is needed?",
+    "options": [
+      "DNS Configuration",
+      "NTP Configuration",
+      "SMTP Configuration",
+      "SNMP Configuration"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "To configure a physical network switch in Prism Element, you'll need SNMP information for the switch, including the switch management IP address, SNMP version, security level, community name, authentication type, privacy type (if applicable), and privacy passphrase (if applicable).",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, Not required when adding a switch.",
+      "Incorrect, Useful but not mandatory.",
+      "Incorrect, Not relevant for switch configuration.",
+      "Correct, Required for monitoring switch status and metrics."
+    ],
+    "tags": [
+      "prism-element",
+      "snmp",
+      "switch"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q6",
+    "domain": "networking",
+    "authoredDifficulty": "easy",
+    "type": "single",
+    "stem": "After deploying a cluster, time is not synchronizing properly. What task needs to be performed on the cluster?",
+    "options": [
+      "DNS configuration",
+      "NTP configuration",
+      "HA configuration",
+      "SMTP configuration"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "NTP (Network Time Protocol) configuration is necessary. After the cluster deployment, ensure that the NTP service is running and configured correctly on each CVM. The cluster should be configured to synchronize with at least three reliable NTP servers for redundancy and accuracy.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: DNS is unrelated to time synchronization.",
+      "Correct: NTP is required to synchronize time across the cluster.",
+      "Incorrect: HA does not affect time settings.",
+      "Incorrect: SMTP is for email notifications, not time settings."
+    ],
+    "tags": [
+      "ntp",
+      "time-sync",
+      "cluster-config"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q7",
+    "domain": "foundation",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "In an RF2 Nutanix cluster, what is the minimum number of nodes required to allow a host removal?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Four nodes are required to remove a host from an RF2 Nutanix cluster. With RF2, two copies of the data exist, ensuring redundancy and fault tolerance. A four-node cluster ensures sufficient resources are available for data replication and availability during the host removal process.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, RF2 requires at least 3 nodes for redundancy.",
+      "Incorrect, Removing a node from a 3-node cluster would break RF2.",
+      "Correct: A 4-node cluster can sustain a single-node removal while maintaining RF2.",
+      "Incorrect: RF2 does not require 5 nodes."
+    ],
+    "tags": [
+      "rf2",
+      "node-removal",
+      "resiliency"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q8",
+    "domain": "security",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator has been tasked with increasing security on a Nutanix cluster by disabling password authentication when accessing the CVM and AHV hosts and instead moving to key-based SSH. What is the easiest way for the administrator to meet these requirements?",
+    "options": [
+      "Configure LDAP authentication through a secure server.",
+      "Enable STIG via command line on SSH to CVM.",
+      "Enable Cluster Lockdown and provide an RSA key.",
+      "Restrict access with User Management in Prism."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "To increase security on a Nutanix cluster by disabling password authentication for Controller Virtual Machine (CVM) and AHV hosts and moving to key-based SSH, enabling Cluster Lockdown and providing an RSA key is the recommended approach.1",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, LDAP does not affect SSH key authentication.",
+      "Incorrect, STIG security compliance does not enforce SSH keys.",
+      "Correct: Cluster Lockdown disables password access and enforces SSH key authentication.",
+      "Incorrect: Prism user management does not enforce SSH key authentication."
+    ],
+    "tags": [
+      "cluster-lockdown",
+      "ssh",
+      "rsa-key",
+      "ahv"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q9",
+    "domain": "ahv",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator needs to make sure that a VM is powered on before the rest of the VMs when starting a host. Which configuration option allows this behavior?",
+    "options": [
+      "Recovery Plan",
+      "Host Affinity",
+      "High Availability",
+      "Agent VM"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The configuration option that allows a VM to be powered on before other VMs when starting a host is to configure the VM as an agent VM. This setting ensures that the VM is prioritized during the host's startup sequence and is powered on before other standard VMs. Agent VMs are typically used for essential services, such as providing network functions, that need to be available before other VMs can function correctly.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, Recovery Plans are used for DR but do not control boot order during host startup.",
+      "Incorrect, Host Affinity controls VM placement but not boot priority.",
+      "Incorrect, High Availability ensures VMs restart after a failure but does not define boot order.",
+      "Correct, Agent VMs, such as those for security or management, can be prioritized to start before others."
+    ],
+    "tags": [
+      "agent-vm",
+      "boot-order",
+      "ahv"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q10",
+    "domain": "networking",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "When expanding a Nutanix cluster, what is required to automatically discover new nodes?",
+    "options": [
+      "New nodes must have the same hypervisor version.",
+      "IPv6 multicast must be allowed on physical switches.",
+      "New nodes must have the same AOS version.",
+      "IPv4 multicast must be allowed on physical switches."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "IPv6 multicast must be allowed on the physical switches for automatic node discovery during cluster expansion. The Controller Virtual Machine (CVM) initiates the process by sending IPv6 and IPv4 multicast packets on port 5353.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "IIncorrect: While important, it is not required for automatic discovery.",
+      "Correct: Nutanix does require IPv6 multicast for node discovery.",
+      "Incorrect: Required for compatibility but not for discovery.",
+      "Incorrect: Nutanix does not uses IPv4 multicast for node discovery."
+    ],
+    "tags": [
+      "cluster-expansion",
+      "ipv6",
+      "multicast",
+      "discovery"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q11",
+    "domain": "monitoring",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator has been asked to calculate baseline Capacity Runway on a newly registered AHV cluster. The cluster has been up and running for 16 days, but no runway projections are displayed. Why are no Capacity Runway projections being displayed?",
+    "options": [
+      "Capacity Planning requires at least 30 days of data.",
+      "Capacity Planning requires at least 21 days of data.",
+      "Capacity Planning requires at least 3 months of data.",
+      "Capacity Planning requires at least 6 months of data."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Capacity Runway projections require at least 21 days of data from a newly registered AHV cluster. Since the cluster has only been running for 16 days, there is insufficient data for the projections to be displayed. Additionally, it takes approximately one day after cluster registration for data to begin appearing in Prism Central",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: 30 days is not the minimum requirement.",
+      "Correct: at least 21 days of historical data is required for projections.",
+      "Incorrect: projections can be generated before 3 months.",
+      "Incorrect: projections can be generated well before 6 months."
+    ],
+    "tags": [
+      "capacity-runway",
+      "capacity-planning",
+      "prism-central"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q12",
+    "domain": "monitoring",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator is responsible for resource planning and needs to plan for resiliency of a 10-node RF3 Nutanix cluster. The cluster has 100TB of storage. How should the administrator plan for capacity in the event of future failures?",
+    "options": [
+      "Set Reserve Storage Capacity (%) to 20.",
+      "Set Reserve Capacity for Failure to None.",
+      "Set Reserve Capacity for Failure to Auto Detect.",
+      "Set Reserve Memory Capacity (%) to 20."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In an RF3 cluster, using \"Auto Detect\" ensures that failure reserves are calculated correctly.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect; does not account for RF3 failure requirements.",
+      "Incorrect; this would leave no reserved space for failures.",
+      "Correct: auto-detect ensures the cluster accounts for failures dynamically.",
+      "Incorrect: Memory capacity does not impact storage resiliency."
+    ],
+    "tags": [
+      "reserve-capacity",
+      "capacity-planning",
+      "rf3"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q14",
+    "domain": "dataprotection",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "An administrator is working with a network team to design the network architecture for a Disaster Recovery (DR) failover. Because DNS is well-designed and implemented, DR will utilize a different subnet from production. To make the planning and execution easy to implement, the network team would like to utilize the same last octet in the IP address in DR. What is the best way to achieve this?",
+    "options": [
+      "Use a custom script to update the IP address after instantiation in DR.",
+      "Set up IPAM so the address is dynamically assigned during DR.",
+      "Manually log into VMs after the DR event and update the last octet.",
+      "Utilize Recovery Plan Offset-based IP mapping."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The best way to retain the same last octet in the IP address while using a different subnet during DR failover is to use static IP mapping within the Recovery Plan. While Nutanix often tries to retain the last octet automatically, it's not guaranteed without static mapping.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect; Works, but is not the best automated solution.",
+      "Incorrect; Works, but requires an external system to manage addresses.",
+      "Incorrect; Inefficient and not recommended for automation.",
+      "Correct; allows automatic IP address adjustment during failover."
+    ],
+    "tags": [
+      "recovery-plan",
+      "ip-mapping",
+      "dr",
+      "subnet"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q15",
+    "domain": "monitoring",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "A user created a report in the prism central Intelligent Operations Analysis Dashboard but forgot to download it. However, after logging back into Prism Central, the administrator finds that the report is no longer available. What is the most likely cause?",
+    "options": [
+      "A user with Cluster Viewer role deleted the report.",
+      "The user-generated report was archived.",
+      "Reports are automatically deleted after 24 hours.",
+      "The report is stored in the cluster’s Prism Element."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The most likely reason is that the report was automatically deleted after 24 hours. Reports generated in the Intelligent Operations dashboard are automatically purged after this time. To retain a report, you should download it (in PDF or CSV format) or save it as a report configuration for later use.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect; cluster Viewer cannot delete reports.",
+      "Incorrect; reports are not archived automatically.",
+      "Correct: temporary reports are deleted after 24 hours.",
+      "Incorrect: reports are stored in Prism Central, not Prism Element."
+    ],
+    "tags": [
+      "reports",
+      "prism-central",
+      "intelligent-operations"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q16",
+    "domain": "performance",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator receives complaints about VM performance. After reviewing the VM’s CPU Ready Time data shown in the exhibit, which step should the administrator take to diagnose the issue and identify root cause?",
+    "options": [
+      "Check the number of vCPUs assigned to each CVM.",
+      "Review host CPU utilization.",
+      "Assess cluster SSD capacity.",
+      "Enable VM memory oversubscription."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "High CPU Ready Time suggests CPU overcommitment or host saturation. The administrator should check host CPU usage in Prism Central to determine if the cluster is overloaded. If host CPU usage is consistently above 85–90%, VMs are competing for CPU resources, leading to high CPU Ready Time.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: CVMs (Controller VMs) have fixed CPU allocation, and modifying their vCPU count is not recommended unless advised by Nutanix Support.",
+      "Correct: high CPU Ready Time indicates host CPU contention.",
+      "Incorrect: SSD capacity impacts storage performance (latency, read/write speeds) but does not affect CPU Ready Time.",
+      "Incorrect: Memory oversubscription does not affect CPU contention."
+    ],
+    "tags": [
+      "cpu-ready-time",
+      "contention",
+      "troubleshooting"
+    ],
+    "image": {
+      "src": "src/content/images/ncp-mci-e1-q16.png",
+      "alt": "A VM CPU Ready Time chart in Prism Central showing many overlapping per-VM series (curie_test vmsmall / vmmedium / vmlarge) over a ten-minute window, with a hover tooltip listing individual VMs and readings of 18%, 18.8% and 21.5%."
+    }
+  },
+  {
+    "id": "ncp-mci-e1-q18",
+    "domain": "security",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "After upgrading Prism Central from PC2022.1 to PC2024.1, an administrator is unable to log in with their IAM active directory domain account. What is the first thing the administrator should do?",
+    "options": [
+      "Ping the Domain Controller from the CVM.",
+      "Ensure port 9441 is open in the firewall.",
+      "Validate the trusted signing certificate of the organization.",
+      "Log in with a local admin account."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Using a local admin account helps diagnose and fix IAM authentication failures.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, Checking network connectivity is useful but not the first step.",
+      "Incorrect, Port 9441 is required for authentication, but other issues may exist.",
+      "Incorrect, Certificate issues can prevent authentication but are not the first check.",
+      "Correct: Logging in locally allows troubleshooting IAM issues."
+    ],
+    "tags": [
+      "prism-central",
+      "iam",
+      "active-directory",
+      "upgrade"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q19",
+    "domain": "monitoring",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "Refer to the exhibit. The customer expects to maintain a cluster runway of 9 months. The customer doesn’t have a budget for 6 months, but they want to add new workloads to the existing cluster. Based on the exhibit, what is required to meet the customer's budgetary timeframe?",
+    "options": [
+      "Add resources to the cluster.",
+      "Postpone the start of new workloads.",
+      "Delete workloads running on the cluster",
+      "Change the target to 9 months."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The exhibit shows an Overall Runway of 59 days, which is significantly less than the customer's goal of 9 months. Since the customer has no budget for 6 months, they cannot purchase the additional hardware required to expand the cluster's capacity (\"Add resources\"). By postponing new workloads, the customer avoids overwhelming the existing resources until they reach the 6-month mark, at which point they can secure a budget to scale the cluster and accommodate the new growth while maintaining their 9-month runway target.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "This is incorrect because the customer explicitly has no budget for the next 6 months to purchase additional hardware.",
+      "Correct: By delaying the addition of new workloads until the 6-month mark (when budget becomes available), the customer can keep the current cluster running within its existing limits and then expand the cluster when they have the funds to do so.",
+      "Incorrect; While this would increase runway, it is usually a last-resort disruptive action and isn't specified as a preference here.",
+      "Incorrect; This is a configuration setting in the tool to see what is needed, but it does not actually solve the capacity shortfall to meet the budget."
+    ],
+    "tags": [
+      "capacity-runway",
+      "capacity-planning",
+      "prism-central"
+    ],
+    "image": {
+      "src": "src/content/images/ncp-mci-e1-q19.png",
+      "alt": "Prism Central capacity runway 'New Scenario' view. Overall Runway 59 days, with CPU, Memory and Storage each also 59 days. Target is set to 6 months. An Existing cluster is selected and Capacity configuration is enabled."
+    }
+  },
+  {
+    "id": "ncp-mci-e1-q20",
+    "domain": "dataprotection",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "A DR administrator has set up a Protection Policy for 50 workloads, all configured similarly in terms of OS, storage, network, and performance. The RPO is 60 minutes with a specified retention of 10 local copies, 5 remote copies, and crash consistency. After configuring the protection policy and activating it, the administrator has noticed that recovery points are not appearing at the DR site yet, everything within the Protection Policy looks correct and recovery points are not showing up on production side. What is the most likely issue?",
+    "options": [
+      "Nutanix Guest Tools (NGT) is not installed on the source VMs.",
+      "Windows updates need to be applied to all affected VMs.",
+      "The storage container name on the DR cluster does not match the production cluster.",
+      "The storage container RF factor does not match in both clusters."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The most likely reason why recovery points are visible on the production side but not at the DR site, despite a correctly configured Protection Policy, is that the storage container name on the DR cluster does not match the production cluster. If a storage container with the same name is not found on the destination cluster, the replicated data will be directed to the SelfServiceContainer. This can lead to recovery points not being readily available in the expected location on the DR site.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, NGT is needed for application-consistent snapshots but not for replication.",
+      "Incorrect, OS updates do not impact Nutanix replication.",
+      "Correct: If container names do not match, replication will fail.",
+      "Incorrect: RF mismatch affects redundancy, not replication."
+    ],
+    "tags": [
+      "protection-policy",
+      "storage-container",
+      "dr",
+      "rpo"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q21",
+    "domain": "ahv",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "An administrator needs to create 2 virtual machines: VM4 and VM5 that leverage the memory over-commit feature. Once VM4 is created and running, the administrator notices that it uses only 28GB of RAM. What will be the maximum RAM that can be allocated to VM5 so that it can be powered on?",
+    "options": [
+      "4GB",
+      "8GB",
+      "16GB",
+      "32GB"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Thehost has 128GB of physical RAM. Thecurrent memory allocationacrossthree VMs (VM1, VM2, VM3) is 128GB, but only92GB is actually utilized. This means there is36GB of unutilized memory available for allocation. VM5 can be allocated up to 8GB of RAM, considering overcommit and available resources the available ememory 36 - 28=8.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: remaining 8 GB.",
+      "Correct: Unutilized memory 36 - 28 = 8 GB",
+      "Incorrect: no available unutilized memory.",
+      "Incorrect: no available unutilized memory."
+    ],
+    "tags": [
+      "memory-overcommit",
+      "ahv",
+      "capacity"
+    ],
+    "image": {
+      "src": "src/content/images/ncp-mci-e1-q21.png",
+      "alt": "Memory table for Host 1 (128 GB). VM1: 64 GB allocated, 48 GB utilized, 16 GB unutilized. VM2: 32 / 20 / 12. VM3: 32 / 24 / 8. Total: 128 GB allocated, 92 GB utilized, 36 GB unutilized."
+    }
+  },
+  {
+    "id": "ncp-mci-e1-q22",
+    "domain": "security",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "The team leads of a dev environment want to limit developer access to a specific set of VMs. What is the most efficient way to enable the team leads to directly manage these VMs?",
+    "options": [
+      "Create a role mapping for each team lead and assign appropriately.",
+      "Create a VPC for each team lead and give them VPC Admin.",
+      "Create a Project for each team lead and assign access.",
+      "Create Security Policies to isolate users."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Based on the search results, using projects and roles within Nutanix's access control system seems like the most direct approach for enabling team leads to manage specific VMs in a development environment.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, Role mappings control access but do not limit it to a specific set of VMs efficiently.",
+      "Incorrect, VPCs are used for network segmentation, not access control for VMs.",
+      "Correct: Projects allow fine-grained control over a specific set of VMs for designated users.",
+      "Incorrect: Security policies define network access but do not manage VM access."
+    ],
+    "tags": [
+      "projects",
+      "rbac",
+      "prism-central",
+      "delegation"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q23",
+    "domain": "lifecycle",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator using a dark site deployment for LCM is attempting to upgrade to the latest BIOS. After completing an inventory scan, the administrator does not see the expected BIOS version available for upgrade. What is the most likely reason the latest BIOS is not shown after inventory?",
+    "options": [
+      "AOS needs to be upgraded first.",
+      "The latest compatibility bundle has not been uploaded.",
+      "The BMC version needs to be upgraded first.",
+      "The dark site webserver is not accessible."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The most likely reason the latest BIOS version isn't shown in Life Cycle Manager (LCM) after an inventory scan in a dark site deployment is that the latest compatibility bundle has not been uploaded. LCM relies on the compatibility bundle to understand which updates are available. If the bundle isn't up-to-date, the latest BIOS versions won't be displayed for upgrade.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: AOS does not need to be upgraded first for a BIOS update.",
+      "Correct: LCM relies on an offline compatibility bundle to detect and upgrade firmware.",
+      "Incorrect: The BMC firmware does not always need updating before BIOS updates.",
+      "Incorrect: In a dark site deployment, LCM does not rely on an internet connection, so webserver access is not required."
+    ],
+    "tags": [
+      "lcm",
+      "dark-site",
+      "bios",
+      "firmware"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q24",
+    "domain": "monitoring",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator needs to create a single chart showing multiple storage bandwidth metrics a VM is consuming. Which type of chart should the administrator create?",
+    "options": [
+      "Metric Chart",
+      "Entity Chart",
+      "Hypervisor Performance Chart",
+      "VM Summary Chart"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "To create a single chart that shows multiple storage bandwidth metrics for a single virtual machine (VM), an administrator should create an Entity Chart. An Entity Chart is the appropriate choice because it is designed to display various performance metrics for a single selected entity, such as a specific VM. This allows an administrator to correlate different metrics, like read bandwidth, write bandwidth, and total bandwidth, for that one VM on a single graph. Resources",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Metric Charts create a chart that tracks a single metric for one or more entities",
+      "Correct: Entity Charts create a chart that tracks one or more metrics for a single entity",
+      "Incorrect, These focus on hypervisor-level performance, not VM storage bandwidth.",
+      "Incorrect, These summarize VM details but do not focus on specific metrics."
+    ],
+    "tags": [
+      "charts",
+      "entity-chart",
+      "prism-central"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q25",
+    "domain": "ahv",
+    "authoredDifficulty": "easy",
+    "type": "single",
+    "stem": "What guest customization options are available when creating a VM template?",
+    "options": [
+      "Sysprep, Cloud-init",
+      "Bash, Powershell",
+      "Python, YAML",
+      "Custom Script, Guided Script"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Sysprep (for Windows), cloud-init (for Linux), custom scripts, and guided scripts are all guest customization options available when creating a VM template.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Correct: These are standard guest customization options in Nutanix.",
+      "Incorrect: These are scripting languages but not specifically guest customization options.",
+      "Incorrect, These are used in automation but are not Nutanix guest customization options.",
+      "Incorrect, Guest customization using Sysprep for windows, and Cloud-init for linux"
+    ],
+    "tags": [
+      "vm-template",
+      "sysprep",
+      "cloud-init",
+      "guest-customization"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q26",
+    "domain": "ahv",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator wants to make sure that VMs can be migrated and restarted on another node in the event of a single-host failure. What action should be taken in Prism Element to meet this requirement?",
+    "options": [
+      "Set Redundancy Factor to 3.",
+      "Configure an RF1 storage container.",
+      "Configure a Protection Domain.",
+      "Enable HA Reservation."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "To ensure that VMs can be migrated and restarted on another node in the event of a single-host failure, enable High Availability (HA) in Prism Element. HA reserves a portion of cluster resources to restart VMs on surviving nodes if a host fails.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, RF3 increases data redundancy but does not ensure VM failover.",
+      "Incorrect, RF1 has no redundancy, making it unsuitable.",
+      "Incorrect, Protection Domains provide backup and recovery but do not ensure VM failover.",
+      "Correct, HA Reservation ensures VMs can restart on another node in case of a failure."
+    ],
+    "tags": [
+      "high-availability",
+      "ha-reservation",
+      "prism-element"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q28",
+    "domain": "security",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator wants to enable Windows Defender Credential Guard to comply with company policy. The new VM configurations include: • Legacy BIOS • 4 vCPUs • 8 GB RAM • Windows Server 2019 What must be changed in order to properly enable Windows Defender Credential Guard?",
+    "options": [
+      "Update Memory to 16GB.",
+      "Use Windows Server 2022.",
+      "Enable UEFI with Secure Boot.",
+      "Update vCPU to 8."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Windows Defender Credential Guard requires UEFI with Secure Boot enabled.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, More memory does not enable Credential Guard.",
+      "Incorrect, Credential Guard is supported on Windows Server 2019 as well.",
+      "Correct: Credential Guard requires UEFI with Secure Boot.",
+      "Incorrect: More vCPUs do not affect Credential Guard."
+    ],
+    "tags": [
+      "credential-guard",
+      "uefi",
+      "secure-boot",
+      "windows"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q29",
+    "domain": "security",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "An administrator attempted to enable Data-in-Transit Encryption on a Scale-Out Prism Central cluster to encrypt service-level traffic between nodes. However, the feature did not work correctly due to a firewall restriction. Which CVM-specific port should be allowed through the firewall for Data-in-Transit Encryption?",
+    "options": [
+      "2009",
+      "9440",
+      "2010",
+      "2020"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The correct port to allow for Data-in-Transit Encryption on a Scale-Out Prism Central cluster is 2009. The Nutanix Security Guide v7.0 states that you should \"ensure that you allow port 2009, which is used for Data-in-Transit Encryption.\" This document also notes that Data-in-Transit Encryption encrypts service-level traffic between cluster nodes.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Correct: port to allow for Data-in-Transit Encryption on a Scale-Out Prism Central cluster is 2009",
+      "Incorrect: Used for Prism Central UI access.",
+      "Incorrect, Not related to Data-in-Transit Encryption.",
+      "Incorrect, Port 2009, not 2020, is used for data-in-transit encryption within a Nutanix cluster."
+    ],
+    "tags": [
+      "data-in-transit-encryption",
+      "ports",
+      "firewall",
+      "prism-central"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q30",
+    "domain": "foundation",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "In a scale-out Prism Central deployment, what additional functionality does configuring an FQDN instead of a Virtual IP provide?",
+    "options": [
+      "Load balancing",
+      "Resiliency",
+      "Segmentation",
+      "SSL Certificate"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "When using FQDN instead of a Virtual IP in a scale-out Prism Central deployment, Nutanix enables load balancing across multiple Prism Central instances.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Correct: because it ensures that requests are distributed among multiple Prism Central nodes, improving performance and redundancy.",
+      "Incorrect: because resiliency is achieved through HA and replication, not through FQDN configuration.",
+      "Incorrect, because network segmentation is handled at the VLAN or security policy level.",
+      "Incorrect, because SSL certificates can be applied regardless of whether FQDN or Virtual IP is used."
+    ],
+    "tags": [
+      "prism-central",
+      "fqdn",
+      "scale-out",
+      "load-balancing"
+    ],
+    "image": {
+      "src": "src/content/images/ncp-mci-e1-q30.png",
+      "alt": "Prism Central 'Cluster Details' dialog. Text reads: Virtual IP and FQDN are used to access the PC VM Cluster. Fields for Cluster Name (Unnamed), FQDN, and Virtual IP, with a note that Virtual IP is relevant for a multi-VM Prism Central."
+    }
+  },
+  {
+    "id": "ncp-mci-e1-q31",
+    "domain": "storage",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "How can a VM or Volume Group (VG) be associated with a Storage Policy?",
+    "options": [
+      "Assign the Storage Policy directly on the VM or VG.",
+      "Assign the VM or VG directly to the Storage Policy.",
+      "Migrate the VM or VG to the Storage Container assigned to the Storage Policy.",
+      "Assign the VM or VG to the same Category as the Storage Policy."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "A VM or Volume Group (VG) can be associated with a Storage Policy using categories. Storage Policies are applied to VMs and VGs via categories using the Kanon service, which applies/fixes up policies every 30 minutes. A default Storage Policy can be selected during VM/VG creation",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect, as policies apply to categories.",
+      "Incorrect, Storage Policies apply to categories, not directly to VMs/VGs.",
+      "Incorrect, Not a valid method to apply a storage policy.",
+      "Correct, Storage policies are applied at the category level."
+    ],
+    "tags": [
+      "storage-policy",
+      "categories",
+      "volume-group"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q32",
+    "domain": "foundation",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "An administrator is managing a 4-node Nutanix cluster, based on intermixed hardware as follows: • Two G5 Nodes # 2 CPUs (12 cores), 1 SSD (1.92 TB), 2 HDDs (4 TB). • Two G7 Nodes # 2 CPUs (16 cores), 2 SSDs (1.92 TB), 4 HDDs (4 TB). G5 Nodes are going out of support and need to be replaced, this cluster will be decommissioned from production and used for Disaster Recovery purposes with an RPO of 1 hour. What is the supported configuration when swapping G5 nodes without impacting performance?",
+    "options": [
+      "New node must have at least 2 SSDs.",
+      "New node must be G7 or G8.",
+      "New node must have 2 CPUs with 12 cores.",
+      "New node must be hybrid."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "For optimal Disaster Recovery performance, new nodes must match or exceed the storage performance of existing nodes View sources",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Correct: Since the G7 nodes have two SSDs, replacing G5 nodes with at least 2 SSDs ensures consistent SSD cache and performance.",
+      "Incorrect: G7 or G8 nodes may help, but storage performance is more critical for DR.",
+      "Incorrect, CPU core count does not impact DR storage performance as much as SSD capacity.",
+      "Incorrect, Hybrid nodes are already in use, but SSDs must match for performance balance."
+    ],
+    "tags": [
+      "intermixed-hardware",
+      "cluster-expansion",
+      "ssd"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q33",
+    "domain": "networking",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "Due to application requirements, an administrator needs to modify an AHV VM to support a large number of distinct, concurrent network connections. The VM has below configuration: • 4 vCPUs • 20 GB RAM • OS: Microsoft Windows Server 2022 Which modification can improve network performance for network I/O-intensive applications running on this VM?",
+    "options": [
+      "Add more vCPUs",
+      "Enable AHV Turbo Technology",
+      "Enable RSS VirtIO-Net Multi-Queue",
+      "Add more RAM"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Enabling RSS VirtIO-Net Multi-Queue optimizes network performance by allowing multiple CPU cores to process network packets in parallel, reducing bottlenecks for network I/O-intensive workloads.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Adding more vCPUs can improve CPU-bound tasks but does not directly optimize network performance.",
+      "Incorrect: AHV Turbo improves disk performance, not network performance.",
+      "Correct: RSS (Receive Side Scaling) VirtIO-Net Multi-Queue enhances network performance by distributing network traffic across multiple vCPUs.",
+      "Incorrect: Increasing RAM helps memory-intensive applications but does not improve network I/O."
+    ],
+    "tags": [
+      "virtio",
+      "multi-queue",
+      "rss",
+      "ahv"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q34",
+    "domain": "monitoring",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "A consultant is configuring syslog monitoring and wants to receive CRITICAL logs from the Audit module. Which severity level setting should be configured to get the desired output?",
+    "options": [
+      "0",
+      "2",
+      "5",
+      "7"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The correct severity level to receive CRITICAL logs from the Audit module is 2. This corresponds to the Critical severity level in syslog. While other modules like SYSLOG_MODULE might require different configurations or log to different locations, for the Audit module itself, selecting level 2 will filter for Critical logs",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Represents emergency logs.",
+      "Correct: Represents critical logs.",
+      "Incorrect: Represents notice-level logs.",
+      "Incorrect: Represents debug-level logs."
+    ],
+    "tags": [
+      "syslog",
+      "severity",
+      "audit"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q35",
+    "domain": "storage",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator is configuring Erasure Coding on a Redundancy Factor 2 Nutanix cluster. How many nodes, at a minimum, are necessary?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "An administrator needs four nodes at a minimum to configure Erasure Coding on a Redundancy Factor 2 cluster. A six-node cluster with RF2 uses a stripe size of five, with four nodes for data and one for parity. The sixth node ensures availability for rebuild in case of node failure.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: RF2 requires a minimum of three nodes but does not support Erasure Coding.",
+      "Correct: Erasure Coding requires at least four nodes but is not optimal but in the question ask about minimum so answer is 4.",
+      "Incorrect: This is the optimal required for effective Erasure Coding.",
+      "Incorrect: Larger clusters improve resilience, but the minimum is five."
+    ],
+    "tags": [
+      "erasure-coding",
+      "rf2",
+      "node-count"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q36",
+    "domain": "lifecycle",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator needs to perform an LCM upgrade on an AHV host with GPUs. What additional step is required for LCM to upgrade an AHV host that has CPUs?",
+    "options": [
+      "Create an agent VM on each host that has GPU drivers installed.",
+      "Run LCM in dark site mode so it can update AHV independently.",
+      "Use Direct Uploads to upload appropriate driver bundles.",
+      "Update NCC to the latest version and re-run Inventory."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Before initiating the LCM upgrade on an AHV host with GPUs, upload the relevant NVIDIA vGPU AHV host driver bundle to the \"Direct Uploads\" section within Nutanix LCM. This ensures the correct driver is available during the upgrade process.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Agent VMs are not required for GPU updates.",
+      "Incorrect: Dark site mode is used when internet access is unavailable but does not affect GPU upgrades.",
+      "Correct: LCM does not automatically fetch GPU drivers. The administrator must download and manually upload the appropriate firmware bundle before upgrading.",
+      "Incorrect: Updating NCC is a best practice but does not resolve GPU driver issues."
+    ],
+    "tags": [
+      "lcm",
+      "gpu",
+      "drivers",
+      "direct-upload"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q37",
+    "domain": "monitoring",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "An administrator is looking at the memory cluster runway diagram, as shown in the exhibit. The environment is based on three hosts with the following configuration: • CPU: 2x Intel Xeon Gold (8 cores, 2.6 GHz) • RAM: 256 GB per host • Storage: SSDs and HDDs The Prism Central Intelligent Operations feature has been active for one month, but no further configurations were applied. What does the dotted red line mean?",
+    "options": [
+      "It is the default trend analysis static threshold that can be manually set.",
+      "It is the maximum memory the administrator can assign to VMs.",
+      "It is the calculated memory oversubscription limit for currently running VMs.",
+      "It is the usable capacity based on cluster configuration options."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The dotted red line in the Prism Central memory cluster runway diagram represents the calculated memory oversubscription limit for the currently running VMs. This dotted red line is not a static threshold.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Admins can manually configure thresholds, but this is not the meaning of the red line.",
+      "Incorrect: Memory allocation limits are set based on available resources, not the red line.",
+      "Correct: The dotted red line represents projected memory exhaustion based on trends.",
+      "Incorrect: Usable capacity is shown differently in Prism."
+    ],
+    "tags": [
+      "memory-runway",
+      "oversubscription",
+      "intelligent-operations"
+    ],
+    "image": {
+      "src": "src/content/images/ncp-mci-e1-q37.png",
+      "alt": "Memory cluster runway chart over 365 days. A dotted line labelled 'Effective Capacity (503.22 GiB)' slopes gently downward across the chart, above a solid blue consumption area that steps up sharply at 'TODAY'. Y-axis runs 0.00 GiB to 651.93 GiB."
+    }
+  },
+  {
+    "id": "ncp-mci-e1-q38",
+    "domain": "foundation",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator wants to change a cluster from Redundancy Factor 2 to 3, but it is not allowed. What must the administrator check?",
+    "options": [
+      "Check that the cluster has been properly licensed.",
+      "Check that the cluster has five or more nodes.",
+      "Check hardware availability of the nodes.",
+      "Check AOS version and upgrade, if needed."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The administrator should check that the cluster has five or more nodes. A minimum of five nodes per cluster is required for Redundancy Factor 3 (RF3).",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Licensing does not affect RF settings.",
+      "Correct: RF3 requires a minimum of five nodes.",
+      "Incorrect: Hardware availability does not restrict RF changes.",
+      "Incorrect: AOS version must support RF3, but the main factor is node count."
+    ],
+    "tags": [
+      "redundancy-factor",
+      "rf3",
+      "node-count"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q39",
+    "domain": "storage",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "Which storage container option reduces the available storage to other containers?",
+    "options": [
+      "Advertised Capacity",
+      "Erasure Coding",
+      "Capacity Deduplication",
+      "Reserved Capacity"
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Reserving capacity for a storage container or setting an advertised capacity limits the available storage to other containers within the same storage pool. By default, all containers share the unused space in a pool. However, with reservations or advertised capacity, a specific amount of storage is allocated to a particular container and becomes unavailable for other containers to utilize.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: This sets a soft quota but does not reduce actual storage.",
+      "Incorrect: Erasure coding optimizes storage but does not restrict other containers.",
+      "Incorrect: Deduplication optimizes space but does not reserve storage.",
+      "Correct: Ensures a fixed amount of storage is allocated, reducing availability for other containers."
+    ],
+    "tags": [
+      "storage-container",
+      "reserved-capacity",
+      "advertised-capacity"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q40",
+    "domain": "monitoring",
+    "authoredDifficulty": "easy",
+    "type": "single",
+    "stem": "An administrator wants to collect log files that have been requested by Nutanix Support team. From which Prism Element dashboard can this be accomplished?",
+    "options": [
+      "Settings",
+      "Alerts",
+      "Health",
+      "Analysis"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "An administrator can collect log files requested by Nutanix Support from the Prism Element dashboard by navigating to the Health page and selecting Actions → Collect Logs. This process utilizes the Logbay utility, which allows for flexible log collection and can be further customized from the command line interface (CLI). Within the Collect Logs section of the Prism Element dashboard, you can specify the nodes and tags for targeted log collection, define the duration of logs to collect, and select the destination for the collected logs.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Used for general system configurations, not log collection.",
+      "Incorrect: Displays system alerts but does not collect logs.",
+      "Correct: The Health dashboard provides an option to generate and download log bundles.",
+      "Incorrect: Provides insights but does not collect logs."
+    ],
+    "tags": [
+      "log-collection",
+      "ncc",
+      "support",
+      "prism-element"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q41",
+    "domain": "lifecycle",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator receives an alert: \"A node cannot enter maintenance mode.\" What could be the cause of this alert?",
+    "options": [
+      "Other nodes in the cluster may not have enough resources available.",
+      "Another node in this cluster is already in maintenance mode.",
+      "This node in the cluster is already in maintenance mode.",
+      "This node in the cluster may not have enough resources available."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The most likely cause for a node failing to enter maintenance mode is that the cluster is in a critical High Availability (HA) state. When HA is critical, it means there aren't enough resources available to restart VMs on other nodes if the node entering maintenance mode fails.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Correct: Insufficient resources prevent nodes from entering maintenance mode.",
+      "Incorrect: Clusters allow only one node at a time in maintenance mode, but this is not the cause of this alert.",
+      "Incorrect: If a node was already in maintenance mode, this alert would not appear.",
+      "Incorrect: Resource availability may affect VM migrations, but maintenance mode is restricted by existing maintenance sessions."
+    ],
+    "tags": [
+      "maintenance-mode",
+      "alerts",
+      "resources"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q42",
+    "domain": "ahv",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator is conducting LCM updates in a Nutanix cluster and is being prompted for handling non-migratable VMs. Which VM type is non-migratable?",
+    "options": [
+      "VMs without NGT",
+      "VMs marked as an Agent",
+      "Memory Overcommitted",
+      "VMs with attached Volume Groups"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Agent VMs are indeed non-migratable. Other non-migratable VM types include those with CPU passthrough, GPU passthrough, PCI passthrough, and VMs with host affinity policies configured. During host maintenance, these VMs are typically shut down and powered back on after the maintenance is complete.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Nutanix Guest Tools (NGT) are used for guest-level integration but do not affect VM migratability.",
+      "Correct: Agent VMs are system-critical and cannot be migrated.",
+      "Incorrect: While memory overcommitment can affect performance, it does not make VMs non-migratable. Nutanix AHV handles memory allocation dynamically.",
+      "Incorrect: as the iSCSI connections used by Volume Groups directed to the data services IP, so VMs with VG can be migrated seamlessly."
+    ],
+    "tags": [
+      "agent-vm",
+      "migration",
+      "lcm",
+      "maintenance-mode"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q43",
+    "domain": "storage",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "When is deduplication recommended?",
+    "options": [
+      "Server workloads",
+      "Linked Clone VMs",
+      "Full clone VMs",
+      "Cold data"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Nutanix recommends enabling deduplication for full clone VMs, persistent desktops, and P2V. VDI workloads using full clones also benefit from deduplication. Server workloads, linked clone VMs, and VAAI clones generally see less benefit. It's not recommended for instant clones or data that is accessed infrequently (cold data).",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Deduplication is not highly beneficial for server workloads as they often have unique data.",
+      "Incorrect: Linked clones share data blocks, making deduplication efficient.",
+      "Correct: Full clones have identical data blocks, benefiting from deduplication.",
+      "Incorrect: Deduplication is typically used for active data rather than cold storage."
+    ],
+    "tags": [
+      "deduplication",
+      "full-clone",
+      "efficiency"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q44",
+    "domain": "ahv",
+    "authoredDifficulty": "easy",
+    "type": "single",
+    "stem": "Within Prism Central, which Compute and Storage section will allow an administrator to upload a Windows ISO file?",
+    "options": [
+      "Catalog Items",
+      "Templates",
+      "Images",
+      "OVAs"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The section within Prism Central where an administrator can upload a Windows ISO file is called \"Image Configuration,\" found under the \"Compute and Storage\" section. This area allows for uploading ISO files, which are then used for creating virtual machines. The process typically involves selecting \"Upload Image,\" filling in the required information (such as name and description), and choosing the source ISO file to upload.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: as this is used to manage preconfigured application templates.",
+      "Incorrect: Used for VM templates, not for storing ISO files.",
+      "Correct: as it allows uploading and managing ISO and disk images.",
+      "Incorrect: as this pertains to importing virtual appliances, not ISO files."
+    ],
+    "tags": [
+      "images",
+      "iso",
+      "prism-central"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q45",
+    "domain": "ahv",
+    "authoredDifficulty": "easy",
+    "type": "single",
+    "stem": "An administrator needs to create a VM Template from an existing VM. What is required for this action to be successful?",
+    "options": [
+      "Sysprep or Cloud-init script.",
+      "The VM is powered on.",
+      "Windows OS is installed.",
+      "The VM is powered off."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "To successfully create a VM template from an existing VM, the source VM must be powered off. Once powered off, you can initiate the template creation process. A template name and, optionally, a description are required when creating the template. You can customize the guest OS settings, and choose whether users can override these settings during VM deployments. Once created, the template metadata is stored in Prism Central, with the data itself stored as a VM recovery point on the same cluster as the source VM. The original VM remains, and can be powered back on at any time.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Helps with VM customization but is not required for template creation.",
+      "Incorrect: as a template cannot be created while the VM is running.",
+      "Incorrect: Not required; a template can be created from any VM state.",
+      "Correct: Required to create a template successfully."
+    ],
+    "tags": [
+      "vm-template",
+      "power-state"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q46",
+    "domain": "monitoring",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator has spent time correcting specific issues that have been identified by NCC Health Checks in Prism Element (PE). How can just the checks that previously did not pass be executed again to confirm they are all resolved?",
+    "options": [
+      "Run LCM Pre-Upgrade to trigger NCC Checks.",
+      "Run ncc health checks run_all.",
+      "Select Run Check for each check worked.",
+      "Select Only Failed And Warning Checks."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Running only failed and warning checks helps verify issue resolution efficiently.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: Triggers checks but includes all, not just failed ones.",
+      "Incorrect: Runs all checks, not just failed ones.",
+      "Incorrect: Can be done manually but is inefficient.",
+      "Correct: The correct option, as it reruns only failed and warning checks."
+    ],
+    "tags": [
+      "ncc",
+      "health-checks",
+      "prism-element"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q47",
+    "domain": "storage",
+    "authoredDifficulty": "easy",
+    "type": "single",
+    "stem": "What is the purpose of the OpLog?",
+    "options": [
+      "Persistent write buffer",
+      "Persistent data storage",
+      "Global metadata",
+      "Dynamic read cache"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The OpLog (Operational Log) in Nutanix serves as apersistent write bufferfor incoming I/O operations. It temporarily stores write requests to ensure fast acknowledgment to clients and better performance. The data is later coalesced and written to the Extent Store for long-term storage.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Correct: The correct option, as OpLog is used for storing incoming writes before committing them to storage.",
+      "Incorrect: OpLog is not a long-term storage mechanism.",
+      "Incorrect: OpLog does not store metadata, it handles write operations.",
+      "Incorrect: OpLog is primarily for writes, not read caching."
+    ],
+    "tags": [
+      "oplog",
+      "write-path",
+      "extent-store"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q49",
+    "domain": "performance",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator observes an alert in Prism for a hybrid SSD/HDD cluster: 1 \"Storage Pool SSD utilization consistently above 75%.\" What is the potential impact of this condition?",
+    "options": [
+      "The cluster is unable to sustain an SSD disk failure.",
+      "The cluster may be nearly out of storage for metadata.",
+      "The cluster is at risk of entering a read-only state.",
+      "Average I/O latency in the cluster may increase."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "High SSD utilization in a hybrid cluster can lead to increased I/O latency as new writes may spill over to HDDs, reducing overall performance. If SSD usage is above 75%, data tiering shifts to slower HDDs, increasing latency.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: SSD failures are managed via redundancy policies (RF2/RF3), and high utilization does not impact failure handling",
+      "Incorrect: Metadata is stored separately, and high SSD usage does not mean metadata is at risk.",
+      "Incorrect: Clusters do not go into read-only mode due to high SSD utilization---they simply experience performance degradation",
+      "Correct: High SSD utilization can slow performance."
+    ],
+    "tags": [
+      "ssd",
+      "storage-pool",
+      "latency",
+      "tiering"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q52",
+    "domain": "dataprotection",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "A company is evaluating Nutanix DR to protect some business-critical applications and tasked an administrator to find an optimal configuration providing highest resiliency and lowest RPO to the production environment. The company's production environment is deployed on two physical sites with each hosting one AHV-based cluster. What configuration will meet the company's requirements?",
+    "options": [
+      "Deploy Prism Central instance on one of the sites. Configure NearSync replication using Protection Domains.",
+      "Deploy one Prism Central instance on each site and configure synchronous replication using Protection Policy.",
+      "Deploy Prism Central instance on one of the sites, configure Prism Central Disaster Recovery, and setup Metro AHV.",
+      "Deploy Prism Central instance on each site. Configure Metro Availability using Protection Domains."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Metro Availability offers the lowest RPO (zero) and highest resiliency: Metro Availability, leveraging synchronous replication, ensures zero data loss and near-zero RTO in a failover scenario. This is the best option for business-critical applications requiring continuous availability. Since the company has two sites, placing Prism Central on each site provides management redundancy.  Protection Domains can also be used as part of this Configuration: Setting up Protection Domains within the Metro Availability configuration enhances disaster recovery capabilities, providing options for granular VM protection and orchestration for less critical applications. These would likely be configured with NearSync replication within the same Prism Central instance.  Other options are suboptimal: Options A and B are not ideal because NearSync and synchronous replication alone don't offer the automatic failover and near-zero RTO provided by Metro Availability. Option C is incorrect because the company has two clusters (one in each site); this would imply that there's a dedicated site for DR which the question does not support.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: NearSync replication provides low RPO but may not offer the highest resiliency.",
+      "Incorrect: Synchronous replication provides the highest resiliency and lowest RPO.",
+      "Incorrect: This option provides good resiliency but may not offer the lowest RPO.",
+      "Correct: Metro Availability provides high resiliency and low RPO."
+    ],
+    "tags": [
+      "metro-availability",
+      "protection-domain",
+      "rpo",
+      "dr"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q53",
+    "domain": "monitoring",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "Which predefined view should be leveraged in Prism Central Intelligent Operations to determine which VM is consuming too many resources and causing other VMs to starve?",
+    "options": [
+      "Constrained VMs List",
+      "Bully VMs List",
+      "Inactive VMs List",
+      "Overprovisioned VMs List"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The \"Bully VMs List\" in Prism Central Intelligent Operations (formerly called AIOps) specifically identifies VMs consuming excessive resources and impacting the performance of other VMs by \"stealing\" resources from them. While other options might provide insights into resource usage, they do not directly address the issue of one VM negatively affecting others.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: This view shows VMs that are constrained by resource limits.",
+      "Correct: This view shows VMs that are consuming excessive resources and causing other VMs to starve.",
+      "Incorrect: This view shows VMs that are inactive and not consuming resources.",
+      "Incorrect: This view shows VMs that are overprovisioned with resources."
+    ],
+    "tags": [
+      "bully-vms",
+      "intelligent-operations",
+      "contention"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q55",
+    "domain": "dataprotection",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "An administrator has been tasked by the company's leadership to justify and explain the decision to utilize the new Nutanix Disaster Recovery solution. The environment contains: • 100 workloads • Workloads have varying boot orders • Workloads span multiple subnets • Workloads span across different business units How should the administrator most efficiently organize and manage the workloads?",
+    "options": [
+      "Utilize Categories to organize VMs in Recovery Plans.",
+      "Utilize RESTful APIs to script creation of Recovery Plans.",
+      "Utilize a 1:10 ratio of Recovery-Plan to VMs.",
+      "Utilize a VM naming schema that allows sorting."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Utilizing Categories to organize VMs in Recovery Plans is the most efficient method. Categories are designed specifically for grouping VMs logically within Recovery Plans. They allow the administrator to manage workloads based on boot order, subnet, business unit or any other criteria relevant to disaster recovery. This approach simplifies recovery orchestration significantly compared to other options.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Correct: Categories help organize VMs efficiently.",
+      "Incorrect: While APIs offer automation capabilities, they don't inherently provide organizational structure. You would still need a method for grouping VMs logically within the Recovery Plans created by the scripts.",
+      "Incorrect: This might be a workable approach, but it doesn't directly address the organizational challenges presented by boot orders, subnets, and business units. It could lead to unnecessary complexity with a large number of Recovery Plans.",
+      "Incorrect: A good naming schema is helpful, but it doesn't replace the need for grouping and orchestrating VMs within Recovery Plans based on dependencies and business requirements. Sorting alone won't manage boot orders or subnet dependencies during recovery."
+    ],
+    "tags": [
+      "categories",
+      "recovery-plan",
+      "dr",
+      "boot-order"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q56",
+    "domain": "storage",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "An administrator has been tasked with creating a new storage container named TestData. The TestData storage container must meet the following conditions: • The container needs to have a Replication Factor of 1 (RF1). • Inline Compression must be enabled. • Deduplication must be disabled. • The container must have a maximum storage capacity of 100 GiB. How should the administrator complete this task?",
+    "options": [
+      "Log into Prism Element and create the storage container.",
+      "Log into Prism Central and create the storage container with a Reserved Capacity of 100 GiB.",
+      "Log into Prism Element and create the storage container with an Advertised Capacity of 100 GiB.",
+      "Log into Prism Central and create the storage container."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "• Prism Element is ideal for managing individual clusters and is the only platform that reliably allows configuration of all required storage container properties at creation, such as Replication Factor, compression, deduplication, and advertised (hard capped) capacity. • Prism Central, while powerful for multi-cluster and global management, does not provide the same level of granularity for storage container creation on a single cluster, especially when enforcing a strict capacity limit and choosing advanced features. • The Advertised Capacity setting in Prism Element is essential to enforce the 100 GiB limit; other methods may not provide a hard cap or could skip key configuration details. • Therefore, Option C directly satisfies all requirements in the scenario, making it the preferred choice for Nutanix storage container creation with strict settings.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: This approach uses Prism Element, which is designed for cluster-local management, including creation of containers with advanced features. However, this option is vague and does not specify setting the capacity (maximum 100 GiB) as required, so it may not enforce the capacity limit directly.",
+      "Incorrect: Prism Central provides centralized management for multiple clusters . Setting Reserved Capacity does not guarantee enforcement of a hard storage limit, so this does not fully satisfy the requirement for strictly limiting container size. Some advanced settings might not be as granular as in Prism Element when configuring storage features at creation time.",
+      "Correct: In Prism Element, when creating storage containers, you can set specific features such as Replication Factor (RF1), enable inline compression, disable deduplication, and—critically—set \"Advertised Capacity\" to 100 GiB, which enforces the storage limit. Prism Element gives you cluster-local control to configure all required features at creation, which is not as easily handled in Prism Central's broader policy management view.",
+      "Incorrect: Prism Central is usually best for environments with multiple clusters, centralized policy management, and automation, but it may not expose all granular features required for specific container customizations (like Replication Factor, compression, deduplication, and explicit advertised capacity limits) at creation time. Without specifying reserved or advertised capacity, this approach is incomplete versus the scenario's requirements."
+    ],
+    "tags": [
+      "storage-container",
+      "rf1",
+      "advertised-capacity",
+      "prism-element"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q58",
+    "domain": "dataprotection",
+    "authoredDifficulty": "hard",
+    "type": "single",
+    "stem": "A new employee has inherited a partially configured Disaster Recovery (DR) schema. Source workloads have been identified and Nutanix Guest Tools has been installed. There are two Protection Polices in place, one with an asynchronous schedule with a 1-hour RPO and a second policy utilizing synchronous replication. All of these workloads need to be recovered at a DR location and this will be orchestrated by Prism Central Recovery Plans. What is the best way to setup this recovery orchestration?",
+    "options": [
+      "Setup a single Recovery Plan utilizing stages of recovery delays as needed.",
+      "Identify the workload startup order and create Recovery Plans corresponding to the startup order.",
+      "Setup two Recovery Plans, one for the asynchronous replication and one for the synchronous replication.",
+      "Setup a Recovery Plan for the asynchronous replication and convert the synchronous replication to a Protection Domain."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Nutanix Disaster Recovery is built to orchestrate failover at the application level, not by replication technology. You can include VMs protected by different Protection Policies (both sync and async) in the same Recovery Plan, and then use stages to define the boot sequence. This keeps DR simple, coordinated, and aligned to real-world business needs — ensuring that an entire application stack can be recovered with a single action.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Correct: Nutanix recommends an application-centric approach to DR. You can (and should) create a single Recovery Plan that includes VMs protected by both synchronous and asynchronous replication policies, as long as they belong to the same application or business service. The plan can use stages and delays to handle boot order and dependencies, orchestrating a smooth failover.",
+      "Incorrect: Startup order should be managed inside a single Recovery Plan using stages and delays — not by splitting into separate Recovery Plans.",
+      "Incorrect: Splitting by replication type breaks the application into multiple plans, forcing operators to coordinate failover manually across different plans — which defeats the purpose of automated recovery orchestration.",
+      "Incorrect: Modern Prism Central Recovery Plans work with Protection Policies directly; converting to Protection Domains adds complexity and is unnecessary."
+    ],
+    "tags": [
+      "recovery-plan",
+      "stages",
+      "boot-order",
+      "dr"
+    ]
+  },
+  {
+    "id": "ncp-mci-e1-q59",
+    "domain": "monitoring",
+    "authoredDifficulty": "medium",
+    "type": "single",
+    "stem": "Within Intelligent Operations, Capacity Configurations have been set to Auto Detect for Reserve Capacity For Failure. For an RF2 cluster with 10 nodes, what effect does this have on Capacity Runway?",
+    "options": [
+      "Reserves 10% of CPU, memory and storage to account for a single node failure.",
+      "Reserves RAM and CPU from the fastest node to account for a single node failure.",
+      "Reserves CPU, RAM and storage from the largest node to account for a single node failure.",
+      "Reserves storage and memory from the largest node to account for a single node failure."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "For an RF2 cluster, “Auto Detect” dynamically calculates and reserves the amount of capacity required to absorb the failure of the single largest node — across all three dimensions: CPU, memory, and storage. This keeps the cluster protected and ensures Capacity Runway calculations accurately reflect the true usable capacity after accounting for node failure tolerance.",
+    "reviewStatus": "human-reviewed",
+    "optionNotes": [
+      "Incorrect: The system doesn’t reserve a flat percentage; instead, it reserves capacity equal to the impact of losing the largest node in the cluster.",
+      "Incorrect: Nutanix doesn’t consider “fastest” node in terms of CPU clock speed or performance. The calculation is based on capacity, not performance.",
+      "Correct: When Capacity Configurations > Reserve Capacity For Failure is set to Auto Detect, Nutanix Intelligent Operations automatically reserves enough CPU, RAM, and storage to handle the failure of the largest node in the cluster. This ensures that, in an RF2 cluster, a single node failure can be tolerated without impacting workload availability.",
+      "Incorrect: This option ignores CPU, which is also included in the reservation calculation. Nutanix reserves all three: CPU, memory, and storage."
+    ],
+    "tags": [
+      "reserve-capacity",
+      "auto-detect",
+      "capacity-runway",
+      "rf2"
+    ]
+  },
+  {
     "id": "NPX-H-001",
     "domain": "foundation",
     "authoredDifficulty": "hard",

@@ -52,6 +52,20 @@ audio-resume hardening, pause menu, mastery dashboard removed).
   Settings "Reset progress" hardened to a true first-time reset. Steve
   opener/closer flavour flagged in `FLAGS.md §2`; visuals in `BROWSER_QA.md`.
 
+### v0.1.1 kickoff (latest)
+- `Upgrade_v0.1.1.md` at the repo root is the 50-item department program
+  (10 each: Game Systems GS-*, Content & Learning CL-*, Graphics GX-*,
+  Player Experience PX-*, Platform & QA PQ-*), each item with a file-level
+  plan + verification gate. Work it top of queue; shared clusters
+  (lifeline copy truth, Steve integrity, loss-reveal enrichment) land once.
+- Version badge: `VERSION` in `src/core/config.js` (pinned to package.json by
+  `tests/version.test.mjs`) renders in the title footer.
+- **Exam2 interchange bank ingested** — 51 owner questions + 6 exhibits
+  (bank 233). New `src/content/parseInterchangeBank.js` (format auto-detected
+  by the importer); interchange ids kept verbatim; `optionNotes` render after
+  grading (feedback panel + green-room reveal). 9 review-file questions parked
+  (`FLAGS.md §0`). Source of record: `docs/interchange/e1.md` + `e1-review.md`.
+
 ### Priority questions (owner practice-exam set)
 - 25 owner-authored questions merged as the priority set (`priority:true`, ids
   `NPX-*`, `reviewStatus:"human-reviewed"`); source `docs/priority-question-bank.md`,

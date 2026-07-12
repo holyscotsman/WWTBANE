@@ -1,6 +1,10 @@
 // config.js — game constants. Pure data, no browser or Node APIs.
 // This is the de-facto core spec (CLAUDE.md §3) expressed as numbers.
 
+// The game version, shown on the title screen. Keep in lockstep with
+// package.json "version" (tests pin the two together).
+export const VERSION = '0.1.1';
+
 // A run is 30 questions: 10 easy / 10 medium / 9 hard / 1 extreme final.
 export const RUN_LENGTH = 30;
 

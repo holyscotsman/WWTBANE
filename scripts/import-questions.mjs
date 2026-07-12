@@ -22,6 +22,7 @@ import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { parseMarkdownBank } from '../src/content/parseMarkdownBank.js';
+import { parseInterchangeBank, looksLikeInterchange } from '../src/content/parseInterchangeBank.js';
 import { validateBank } from '../src/core/questionSchema.js';
 
 const args = process.argv.slice(2);
@@ -37,9 +38,13 @@ if (!existsSync(input)) {
 }
 
 const md = readFileSync(input, 'utf8');
-const { questions, rejected, summary } = parseMarkdownBank(md);
+// Two authored formats are accepted: the native one (## blocks, [x] marks —
+// docs/QUESTION_AUTHORING.md) and the cross-game interchange one (### blocks,
+// (x) marks). Auto-detected by shape.
+const interchange = looksLikeInterchange(md);
+const { questions, rejected, summary } = interchange ? parseInterchangeBank(md) : parseMarkdownBank(md);
 
-console.log(`\nParsed ${input}`);
+console.log(`\nParsed ${input} (${interchange ? 'interchange' : 'native'} format)`);
 console.log(`  ✓ ${questions.length} valid question(s)`);
 if (rejected.length) {
   console.log(`  ✗ ${rejected.length} rejected:`);
