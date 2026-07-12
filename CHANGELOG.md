@@ -30,6 +30,20 @@
   the parser REJECTS any block carrying `@review`/`@multi` flags, so a review
   file can never slip into the shipped bank (owner decisions logged in
   `FLAGS.md`).
+- **Music starts on the first click now** — a loop begun while the browser held
+  the audio context suspended (autoplay policy) could stay silent on some
+  browsers until the player toggled music off/on. `Music.resume()` now rebuilds
+  the current track on a running context the moment resume lands — the first
+  gesture does automatically what the toggle did by accident.
+- **The title theme is a show theme** — the menu/green-room "lounge" is
+  recomposed from a slow elevator-jazz vamp into an upbeat game-show opener:
+  118 BPM, bright I–V–vi–IV, driving bass, offbeat stabs, and the show's
+  question hook on top (original composition, per the brand rules). Queued for
+  a human listen in `BROWSER_QA.md`.
+- **The audience faces the show** — every seated crowd member (and chair) was
+  rotated to face away from the stage; the yaw math aimed their fronts outward
+  while only their vote cards faced in. Fixed to face stage centre; the
+  walk-on actor inherits the corrected seat yaw. Queued in `BROWSER_QA.md`.
 
 ## Unreleased — priority questions (owner practice-exam set, mastered first)
 

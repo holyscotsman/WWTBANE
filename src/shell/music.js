@@ -3,7 +3,7 @@
 // recreation of any existing show's music). No audio files ship with the game.
 //
 // Tracks (looping):
-//   lounge   — main menu + green room: relaxed, elevator-jazz vamp
+//   lounge   — main menu + green room: upbeat show-theme vamp
 //   easy     — bright and quick (G major, 126 BPM)
 //   medium   — a step tenser and lower (E minor, 110 BPM)
 //   hard     — slower and darker still (C minor, 94 BPM)
@@ -44,21 +44,30 @@ function pumpBass(lo, hi, len) {
 }
 
 const TRACKS = {
-  // Menu + green room. Laid-back major-7 vamp — the waiting-room record.
+  // Menu + green room. Upbeat show-theme vamp — bright I–V–vi–IV, driving bass,
+  // offbeat stabs, and the show hook on top: "you're on a game show" energy the
+  // moment the title loads (owner note: the old laid-back vamp read as sad).
   lounge: {
-    bpm: 76, beats: 16, gain: 0.7,
+    bpm: 118, beats: 16, gain: 0.72,
     voices: [
-      { wave: 'sine', gain: 0.45, kind: 'bass', notes: [
-        [0, 'C2', 1.6], [2, 'G2', 1.6], [4, 'A1', 1.6], [6, 'E2', 1.6],
-        [8, 'F2', 1.6], [10, 'C2', 1.6], [12, 'G1', 1.6], [14, 'B1', 1.6],
+      { wave: 'triangle', gain: 0.46, kind: 'bass', notes: pumpBass(
+        ['C2', 'C2', 'G1', 'G1', 'A1', 'A1', 'F2', 'F2'],
+        ['C3', 'C3', 'G2', 'G2', 'A2', 'A2', 'F3', 'F3'], 0.45) },
+      { wave: 'sawtooth', gain: 0.06, kind: 'pad', cutoff: 1200, notes: [
+        [0.5, ['C4', 'E4', 'G4'], 0.35], [1.5, ['C4', 'E4', 'G4'], 0.35], [3, ['C4', 'E4', 'G4'], 0.6],
+        [4.5, ['B3', 'D4', 'G4'], 0.35], [5.5, ['B3', 'D4', 'G4'], 0.35], [7, ['B3', 'D4', 'G4'], 0.6],
+        [8.5, ['A3', 'C4', 'E4'], 0.35], [9.5, ['A3', 'C4', 'E4'], 0.35], [11, ['A3', 'C4', 'E4'], 0.6],
+        [12.5, ['A3', 'C4', 'F4'], 0.35], [13.5, ['A3', 'C4', 'F4'], 0.35], [15, ['A3', 'C4', 'F4'], 0.6],
       ] },
-      { wave: 'triangle', gain: 0.30, kind: 'chord', notes: [
-        [0.5, ['E3', 'G3', 'B3'], 2.6], [4.5, ['E3', 'G3', 'C4'], 2.6],
-        [8.5, ['F3', 'A3', 'C4'], 2.6], [12.5, ['F3', 'G3', 'B3'], 2.6],
+      { wave: 'square', gain: 0.085, kind: 'arp', pluck: 0.35, notes: hookArp([
+        ['C4', 'E4', 'G4', 'C5'], ['G3', 'B3', 'D4', 'G4'],
+        ['A3', 'C4', 'E4', 'A4'], ['F3', 'A3', 'C4', 'F4'],
+      ], 0.38) },
+      { wave: 'sine', gain: 0.10, kind: 'lead', pluck: 0.5, notes: [
+        [3.5, 'E5', 0.7], [7.5, 'D5', 0.7], [11.5, 'C5', 0.7], [15, 'G5', 1.0],
       ] },
-      { wave: 'sine', gain: 0.16, kind: 'lead', pluck: 0.5, notes: [
-        [2, 'E4', 0.9], [3, 'G4', 0.9], [6.5, 'B4', 1.2], [10, 'A4', 0.9], [11, 'G4', 0.9], [14.5, 'D4', 1.2],
-      ] },
+      { kind: 'thump', gain: 0.18, notes: [[0, 0, .3], [2, 0, .3], [4, 0, .3], [6, 0, .3], [8, 0, .3], [10, 0, .3], [12, 0, .3], [14, 0, .3]] },
+      { kind: 'hat', gain: 0.05, notes: (() => { const s = []; for (let i = 0; i < 16; i++) s.push([i + 0.5, 0, 0.05]); return s; })() },
     ],
   },
 
@@ -235,7 +244,24 @@ export class Music {
     } catch { return false; }
   }
 
-  resume() { if (this._ensure() && this.ctx.state === 'suspended') this.ctx.resume(); }
+  resume() {
+    if (!this._ensure() || this.ctx.state !== 'suspended') return;
+    const wasPlaying = this.currentName;
+    const p = this.ctx.resume();
+    // A loop begun against a suspended clock (autoplay policy at boot) is not
+    // reliable in every browser — the owner's "toggle music off/on fixes it"
+    // report is exactly that: the toggle rebuilt the loop on a RUNNING context.
+    // Make the rebuild automatic: once resume actually lands, re-render the
+    // current track fresh so the first gesture always brings the music up.
+    if (p && typeof p.then === 'function' && wasPlaying) {
+      p.then(() => {
+        if (this.ctx.state !== 'running' || this.currentName !== wasPlaying) return;
+        this.currentName = null; // force play() to rebuild rather than no-op
+        this._fadeOutCurrent();
+        this.play(wasPlaying);
+      }).catch(() => { /* resume denied — the next gesture retries */ });
+    }
+  }
 
   setEnabled(v) {
     this.enabled = v;

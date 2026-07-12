@@ -700,7 +700,10 @@ export class Studio {
       for (let i = 0; i < per; i++) {
         const a = Math.PI * 1.06 + (i / (per - 1)) * Math.PI * 0.88;
         const scale = 0.95 + ((i * 37 + t * 13) % 15) / 100;
-        o.position.set(Math.cos(a) * R, Y, Math.sin(a) * R); o.rotation.y = -a + Math.PI / 2;
+        // Face the STAGE: a person's front (lap/arms/face) is local +Z, so the
+        // yaw must aim +Z at the origin — that's 3π/2 − a. (−a + π/2 aimed them
+        // outward; the whole crowd sat with its back to the show.)
+        o.position.set(Math.cos(a) * R, Y, Math.sin(a) * R); o.rotation.y = Math.PI * 1.5 - a;
         o.scale.setScalar(1); o.updateMatrix(); chairs.setMatrixAt(count, o.matrix);
         o.scale.setScalar(scale); o.updateMatrix();
         audBody.setMatrixAt(count, o.matrix); audHead.setMatrixAt(count, o.matrix); audHair.setMatrixAt(count, o.matrix);
