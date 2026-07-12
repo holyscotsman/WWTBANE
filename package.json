@@ -1,6 +1,6 @@
 {
   "name": "wwtbane",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Who Wants to be a Nutanix Engineer? — a game-show quiz for the Nutanix NCP-MCI exam.",
   "type": "module",

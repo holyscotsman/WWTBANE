@@ -1,5 +1,36 @@
 # Changelog
 
+## Unreleased — v0.1.1 kickoff: upgrade program, version badge, Exam2 bank
+
+- **Version on the title screen** — the game now shows its version (v0.1.1) in
+  the title footer. Single source: `VERSION` in `src/core/config.js`, pinned to
+  `package.json` by a headless test so the two can never drift.
+- **`Upgrade_v0.1.1.md`** — the 50-item upgrade program: 10 planned items for
+  each of the five departments (Game Systems, Content & Learning,
+  Graphics/Cinematics Studio, Player Experience, Platform & QA), each with a
+  concrete implementation plan, verification gate, and the project rules that
+  bound it. Produced by a 10-agent research + adversarial-review pass over the
+  live tree; shared deliverables are cross-referenced so nothing lands twice.
+- **Exam2 interchange bank: 51 questions + 6 exhibits (bank now 233).** The
+  owner supplied a second practice exam in the cross-game "canonical
+  interchange" format (shared with StarNix). A new pure parser
+  (`src/content/parseInterchangeBank.js`) structures it — stems, options, keys,
+  and explanations stay verbatim; `@briefing` (StarNix voice) is dropped; the
+  importer auto-detects the format and `--merge`d the 51 ahead of the existing
+  bank. Six real exhibit images ship in `src/content/images/` and render inline
+  in the question card (alt text required). Interchange ids (`ncp-mci-e1-qN`)
+  are kept verbatim so mastery stays stable across games and re-imports.
+- **Per-option explanations now teach.** Interchange questions carry a note per
+  option (why each distractor is wrong). A correct answer's feedback gains a
+  collapsed "Why the other options are wrong" panel; a loss shows the note for
+  the option you picked in the green-room reveal. Presentation of authored
+  content only — nothing is generated.
+- **Quarantine honored** — the 9 review-file questions (8 choose-two + 1 with a
+  contradictory source key) are parked in `docs/interchange/e1-review.md` and
+  the parser REJECTS any block carrying `@review`/`@multi` flags, so a review
+  file can never slip into the shipped bank (owner decisions logged in
+  `FLAGS.md`).
+
 ## Unreleased — priority questions (owner practice-exam set, mastered first)
 
 - **25 owner-authored practice-exam questions added as the priority set.** The

@@ -29,9 +29,22 @@ required by CLAUDE.md §4.
   re-derived). Outstanding human item: confirm the **domain/difficulty tags**,
   which were assigned during ingestion, not by the owner (`FLAGS.md §1`).
 
+## Exam2 interchange set (owner-supplied, merged ahead of the AI-drafted pool)
+- **51 questions** from `docs/interchange/e1.md` (ids `ncp-mci-e1-qN`),
+  transcribed verbatim from the source exam by the owner — stems, options,
+  keys, per-option explanations, and overall explanations are the exam's own,
+  so these ship `reviewStatus:"human-reviewed"`. 6 exhibit images included.
+- **Machine QA here was structural only** plus an independent key cross-check:
+  every parsed `answer` was re-extracted straight from the raw `(x)` marks and
+  matched 51/51; zero duplicate stems against the rest of the bank.
+- **Bank total: 233** (51 interchange + 25 NPX priority + 157 AI-drafted).
+
 ## Quarantined (not shipped)
 - STOR-X-001: Duplicate niche fact (Curator scan cadence) — kept PERF-X-001
 - FDN-X-001: Duplicate niche fact (192.168.5.254 internal address) — kept AHV-X-001
+- 9 interchange review-file questions (`docs/interchange/e1-review.md`):
+  8 choose-two + 1 contradictory source key — each needs an owner decision
+  (see `FLAGS.md §0`); the parser rejects `@review`/`@multi` blocks outright.
 
 ## Human review checklist
 - [ ] Spot-check a sample of `verified` keys against current Nutanix documentation.

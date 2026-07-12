@@ -26,6 +26,22 @@ function reduced() { return document.body.classList.contains('reduced-motion'); 
 
 // Optional authored diagram/screenshot for a question ({ src, alt, caption? },
 // validated by questionSchema). A missing file must never block play — the
+// Per-option notes from the source exam (why each distractor is wrong). Shown
+// collapsed under the explanation after a correct answer — pure presentation of
+// authored content, never generated. Empty notes are skipped.
+function optionNotesPanel(q, correctSet) {
+  if (!q || !Array.isArray(q.optionNotes)) return null;
+  const rows = q.optionNotes
+    .map((note, i) => ({ note, i }))
+    .filter(({ note, i }) => note && !correctSet.has(i));
+  if (!rows.length) return null;
+  return h('details', { class: 'fb-notes' },
+    h('summary', {}, 'Why the other options are wrong'),
+    h('ul', {}, ...rows.map(({ note, i }) =>
+      h('li', {}, h('b', {}, letter(i) + ': '), note))),
+  );
+}
+
 // whole figure removes itself if the image fails to load.
 function questionImage(image) {
   const img = h('img', { src: image.src, alt: image.alt, loading: 'lazy' });
@@ -414,6 +430,7 @@ export class QuizScreen {
       h('div', { class: 'fb-head' }, result.won ? '🏆 You did it!' : '✓ Correct'),
       result.boundary ? h('div', { class: 'fb-bank' }, `🛡 Banked ${result.banked.toLocaleString('en-US')} coins — that's yours to keep.`) : null,
       h('p', { class: 'fb-exp' }, result.explanation),
+      optionNotesPanel(result.q, correctSet),
       result.q && result.q.reference ? h('p', { class: 'fb-ref' }, 'Reference: ' + result.q.reference) : null,
       h('button', { class: 'continue-btn', type: 'button', onclick: () => this.handlers.onContinue && this.handlers.onContinue(result) }, label),
     );

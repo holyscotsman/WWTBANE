@@ -47,6 +47,18 @@ test('negative control: multi-answer marking every option correct is rejected', 
 test('negative control: bad id format is rejected', () => {
   assert.equal(validateQuestion({ ...good, id: 'nope' }).ok, false);
 });
+test('interchange ids validate; malformed interchange ids do not', () => {
+  assert.equal(validateQuestion({ ...good, id: 'ncp-mci-e1-q7' }).ok, true);
+  assert.equal(validateQuestion({ ...good, id: 'ncp-mci-e1-7' }).ok, false);  // NEGATIVE CONTROL (no -qN)
+  assert.equal(validateQuestion({ ...good, id: 'NCP-MCI-e1-q7' }).ok, false); // NEGATIVE CONTROL (mixed case)
+});
+test('optionNotes must align 1:1 with options and be strings', () => {
+  assert.equal(validateQuestion({ ...good, optionNotes: ['a', 'b', 'c', 'd'] }).ok, true);
+  assert.equal(validateQuestion({ ...good, optionNotes: ['a', '', '', ''] }).ok, true, 'empty entries allowed');
+  assert.equal(validateQuestion({ ...good, optionNotes: ['a', 'b'] }).ok, false);          // NEGATIVE CONTROL (misaligned)
+  assert.equal(validateQuestion({ ...good, optionNotes: 'a note' }).ok, false);            // NEGATIVE CONTROL (not an array)
+  assert.equal(validateQuestion({ ...good, optionNotes: ['a', 'b', 'c', 42] }).ok, false); // NEGATIVE CONTROL (non-string)
+});
 test('negative control: impossible flag on non-extreme is rejected', () => {
   assert.equal(validateQuestion({ ...good, impossible: true }).ok, false);
 });

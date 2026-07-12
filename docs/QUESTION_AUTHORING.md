@@ -108,6 +108,28 @@ disturbing the main bank:
 node scripts/import-questions.mjs docs/priority-question-bank.md --merge
 ```
 
+## The interchange format (second accepted input)
+
+The importer auto-detects the cross-game **canonical interchange format**
+(shared with StarNix): `### <id>` blocks, `- ( )` / `- (x)` options with
+per-option `> note` explanations, and `@field:` metadata (`@overall`, `@domain`,
+`@difficulty: 1|2|3`, `@tags`, `@image`/`@image-alt`, optional `@priority`).
+The format is documented inside the bank files themselves — see
+`docs/interchange/e1.md`. Notes for WWTBANE:
+
+- Interchange **ids are kept verbatim** (`ncp-mci-e1-q7`) so mastery records
+  stay stable across games and re-imports.
+- Domains map: `architecture`→`foundation`, `vms`→`ahv`,
+  `data-protection`→`dataprotection`; the rest are identical.
+- `@briefing` is StarNix commander dialogue and is **dropped** — WWTBANE's
+  host and Steve have their own voice.
+- Per-option `>` notes ship as `optionNotes` and render after grading ("Why the
+  other options are wrong" on a correct answer; your pick's note on a loss).
+- Blocks flagged `@review`/`@multi` are **rejected** — review files stay
+  quarantined until a human clears each block.
+- Exhibit images referenced by `@image:` must be dropped in
+  `src/content/images/` and always need `@image-alt:` text.
+
 You don't have to run it yourself — upload the Markdown (and images) and I'll
 run the import, show you the report, and ship the new bank.
 
