@@ -204,17 +204,17 @@ export class SetManager {
   setReachedFinalBefore(v) { this.reachedFinalBefore = v; }
 
   // A guaranteed-upcoming hard question from the UPCOMING run (the prebuilt
-  // `current` set) for Steve to teach. Prefers ones with an authored steveClue
-  // and not in `alreadyTaught`. The double-buffer guarantees this set already
-  // exists, so the clue references a real question the player will actually face.
+  // `current` set) for Steve to teach. ONLY a question that carries an authored
+  // steveClue AND has not been taught before qualifies — Steve never repeats a
+  // clue (CLAUDE.md §3) and never sells a question he has nothing to say about
+  // (the old fallback charged 4,000 coins and rendered an empty tip). When
+  // nothing qualifies, null: the green room shows his "nothing new" state.
   peekUpcomingHard(alreadyTaught = new Set()) {
     if (!this._current) return null;
     const mastery = this.getMastery();
     const hards = this._current.filter((q) => tierOfQuestion(q, mastery, this.mode) === 'hard' || q.authoredDifficulty === 'hard');
     const withClue = hards.filter((q) => q.steveClue && !alreadyTaught.has(q.id));
-    if (withClue.length) return withClue[0];
-    const fresh = hards.filter((q) => !alreadyTaught.has(q.id));
-    return fresh[0] || hards[0] || null;
+    return withClue[0] || null;
   }
 }
 

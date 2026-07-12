@@ -325,7 +325,9 @@ export class Game {
     // Fresh Steve availability each visit.
     if (!this.steveVisit.locked) {
       const q = this.campaign.peekUpcomingHard(new Set(this.save.steveTaught));
-      this.steveVisit = { called: false, locked: false, question: q, clue: q ? q.steveClue : '' };
+      // Belt-and-braces: selection only returns clue-carrying questions, but a
+      // missing clue must never reach the UI as the string "undefined".
+      this.steveVisit = { called: false, locked: false, question: q, clue: (q && q.steveClue) || '' };
     }
     this._renderGreenRoom();
   }

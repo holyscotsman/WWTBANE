@@ -134,6 +134,28 @@ test('SetManager feeds the shared run clock into mastery weighting (staleness su
   assert.notDeepEqual(ids(sm0.init()), ids(direct10), 'a collapsed clock changes selection');
 });
 
+test('Steve never repeats a taught clue and never sells a clue-less question', () => {
+  // 8 clue-less hards + AHV-H-900 (the only clue carrier) = exactly 9 hards, so
+  // every hard question is guaranteed into the seeded set's 9 hard slots.
+  const bank = makeBank({ hard: 8 });
+  const sm = new SetManager({ bank, getMastery: () => emptyMastery(), mode: 'seeded', seed: 'STEVE', reachedFinalBefore: true });
+  sm.init();
+
+  // NEGATIVE CONTROL: untaught, clue-carrying → returned (Steve still works).
+  const q = sm.peekUpcomingHard(new Set());
+  assert.ok(q && q.id === 'AHV-H-900' && q.steveClue, 'the clue carrier is offered');
+
+  // Already taught → null, even with 8 untaught clue-less hards in the set
+  // (the old fallback would re-teach or sell one of those).
+  assert.equal(sm.peekUpcomingHard(new Set(['AHV-H-900'])), null, 'no repeats, no clue-less sales');
+
+  // A set whose hard slots hold ONLY clue-less questions → null outright.
+  const bare = makeBank({ hard: 9 }).filter((x) => x.id !== 'AHV-H-900');
+  const sm2 = new SetManager({ bank: bare, getMastery: () => emptyMastery(), mode: 'seeded', seed: 'STEVE2', reachedFinalBefore: true });
+  sm2.init();
+  assert.equal(sm2.peekUpcomingHard(new Set()), null, 'nothing to teach means nothing for sale');
+});
+
 test('SetManager keeps a disjoint current/next and Steve reads the upcoming run', () => {
   // Big enough to build two fully-disjoint back-to-back runs (needs >= 60).
   const bank = makeBank({ easy: 25, medium: 25, hard: 25, extreme: 8, impossible: 2 });
