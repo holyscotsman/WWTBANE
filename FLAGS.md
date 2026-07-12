@@ -71,6 +71,10 @@ ship, but each wants a human before it's "done" per `CLAUDE.md`.
   lines were AI-drafted at the owner's explicit request ("the host explains how
   to play") — they are game-mechanics narration, not exam teaching — but still
   warrant a human read-through for voice and tone.
+- **Also in this bucket:** the corrected Help-screen copy (lifeline accuracy +
+  the new keyboard bullet) and the reworked README lifeline/safe-haven wording
+  — mechanics documentation aligned to `docs/LIFELINES.md`, awaiting the same
+  human read (kept honest by the `tests/docs.test.mjs` drift gate).
 - **Integrity note:** the tutorial's revealed answer marks Q1 as assisted, so
   the freebie never promotes mastery.
 
