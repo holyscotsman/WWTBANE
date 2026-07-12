@@ -203,6 +203,20 @@ export class SetManager {
 
   setReachedFinalBefore(v) { this.reachedFinalBefore = v; }
 
+  // Honor Steve's promise across sessions: the campaign sets are memory-only,
+  // so a clue paid for last session may not be in this session's rebuilt set.
+  // Pin the taught question into the CURRENT set's hard block (play order
+  // 21–29, 0-based 20–28 per the 10/10/9/1 shape) so the clue still references
+  // a real, guaranteed-upcoming question (CLAUDE.md §3). No-op if already in.
+  pinIntoCurrent(q) {
+    if (!q || !this._current) return false;
+    if (this._current.some((x) => x.id === q.id)) return false;
+    const slot = 20; // first hard slot
+    this._current = this._current.slice();
+    this._current[slot] = q;
+    return true;
+  }
+
   // A guaranteed-upcoming hard question from the UPCOMING run (the prebuilt
   // `current` set) for Steve to teach. ONLY a question that carries an authored
   // steveClue AND has not been taught before qualifies — Steve never repeats a

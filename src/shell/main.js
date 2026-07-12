@@ -400,6 +400,9 @@ export class Game {
     if (!this.save.steveTaught.includes(this.steveVisit.question.id)) {
       this.save.steveTaught.push(this.steveVisit.question.id);
     }
+    // The paid promise survives a reload: until this question appears in a run,
+    // a rebuilt campaign pins it back into the upcoming set (_ensureCampaign).
+    this.save.stevePending = this.steveVisit.question.id;
     this.audio.play('lifeline');
     this.persist();
     this._renderGreenRoom(); // the clue now lives in the panel underneath…
@@ -421,6 +424,14 @@ export class Game {
       getRunIndex: () => this.save.stats.runs,
     });
     this.campaign.init();
+    // Steve's paid, not-yet-delivered clue: the rebuilt set almost certainly
+    // dropped that question — pin it back so the promise (CLAUDE.md §3:
+    // "a real, guaranteed-upcoming question") holds across sessions.
+    if (this.save.stevePending) {
+      const pending = this.bank.find((q) => q.id === this.save.stevePending);
+      if (pending) this.campaign.pinIntoCurrent(pending);
+      else { this.save.stevePending = null; this.persist(); } // question left the bank
+    }
   }
 
   startRun(mode, seedInput) {
@@ -454,6 +465,11 @@ export class Game {
     }
 
     this.steveVisit.locked = false; // next green-room visit re-rolls Steve
+    // Steve's promise is delivered the moment his question enters a live run.
+    if (this.save.stevePending && set.some((q) => q.id === this.save.stevePending)) {
+      this.save.stevePending = null;
+      this.persist();
+    }
     this.mode = mode; this.seed = seed;
     // Lifelines: run works off (and depletes) the saved charges.
     this.rc = new RunController({

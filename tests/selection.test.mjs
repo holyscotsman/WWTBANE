@@ -134,6 +134,26 @@ test('SetManager feeds the shared run clock into mastery weighting (staleness su
   assert.notDeepEqual(ids(sm0.init()), ids(direct10), 'a collapsed clock changes selection');
 });
 
+test('pinIntoCurrent places a promised question into a hard slot exactly once', () => {
+  const bank = makeBank({ easy: 25, medium: 25, hard: 25, extreme: 8, impossible: 2 });
+  const sm = new SetManager({ bank, getMastery: () => emptyMastery(), mode: 'seeded', seed: 'PIN', reachedFinalBefore: true });
+  sm.init();
+  const outsider = bank.find((q) => q.authoredDifficulty === 'hard' && !sm.current().some((x) => x.id === q.id));
+  assert.ok(outsider, 'fixture provides a hard question outside the set');
+
+  assert.equal(sm.pinIntoCurrent(outsider), true);
+  const set = sm.current();
+  assert.equal(set.length, 30);
+  assert.equal(new Set(set.map((q) => q.id)).size, 30, 'still 30 distinct');
+  const idx = set.findIndex((q) => q.id === outsider.id);
+  assert.ok(idx >= 20 && idx <= 28, `pinned into the hard block (got ${idx})`);
+
+  // NEGATIVE CONTROL: pinning a question already in the set is a no-op.
+  const before = set.map((q) => q.id);
+  assert.equal(sm.pinIntoCurrent(set[5]), false);
+  assert.deepEqual(sm.current().map((q) => q.id), before, 'set unchanged');
+});
+
 test('Steve never repeats a taught clue and never sells a clue-less question', () => {
   // 8 clue-less hards + AHV-H-900 (the only clue carrier) = exactly 9 hards, so
   // every hard question is guaranteed into the seeded set's 9 hard slots.
